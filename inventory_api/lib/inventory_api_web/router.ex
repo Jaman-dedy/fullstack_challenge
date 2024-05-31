@@ -24,16 +24,20 @@ defmodule InventoryApiWeb.Router do
     pipe_through :api
 
     # Inventory endpoints
+    post "/init_catalog", InventoryController, :create
+    post "/process_restock", InventoryController, :process_restock
     post "/inventory", InventoryController, :create
     get "/inventory/:id", InventoryController, :show
     put "/inventory/:id", InventoryController, :update
 
     # Order endpoints
+    post "/process_order", OrderController, :process_order
     post "/orders", OrderController, :create
     get "/orders/:id", OrderController, :show
     put "/orders/:id", OrderController, :update
 
     # Shipping endpoints
+    post "/ship_package", ShippingController, :ship_package
     post "/shipping", ShippingController, :create
     get "/shipping/:id", ShippingController, :show
     put "/shipping/:id", ShippingController, :update

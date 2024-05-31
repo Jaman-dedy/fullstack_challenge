@@ -27,4 +27,30 @@ defmodule InventoryApiWeb.InventoryController do
         |> json(%{error: reason})
     end
   end
+
+  def show(conn, %{"id" => id}) do
+    case InventoryService.get_inventory(id) do
+      {:ok, inventory} ->
+        conn
+        |> put_status(:ok)
+        |> render("show.json", inventory: inventory)
+      {:error, reason} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: reason})
+    end
+  end
+
+  def update(conn, %{"id" => id, "inventory" => inventory_params}) do
+    case InventoryService.update_inventory(id, inventory_params) do
+      {:ok, inventory} ->
+        conn
+        |> put_status(:ok)
+        |> render("show.json", inventory: inventory)
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: reason})
+    end
+  end
 end
