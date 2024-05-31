@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: inventory_api_dev
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    environment:
+      DATABASE_URL: ecto://postgres:postgres@db/inventory_api_dev
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
