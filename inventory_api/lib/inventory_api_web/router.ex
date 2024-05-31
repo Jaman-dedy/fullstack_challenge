@@ -20,10 +20,25 @@ defmodule InventoryApiWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", InventoryApiWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", InventoryApiWeb do
+    pipe_through :api
+
+    # Inventory endpoints
+    post "/inventory", InventoryController, :create
+    get "/inventory/:id", InventoryController, :show
+    put "/inventory/:id", InventoryController, :update
+
+    # Order endpoints
+    post "/orders", OrderController, :create
+    get "/orders/:id", OrderController, :show
+    put "/orders/:id", OrderController, :update
+
+    # Shipping endpoints
+    post "/shipping", ShippingController, :create
+    get "/shipping/:id", ShippingController, :show
+    put "/shipping/:id", ShippingController, :update
+
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:inventory_api, :dev_routes) do
