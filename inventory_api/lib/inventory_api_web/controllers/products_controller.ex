@@ -1,43 +1,62 @@
 defmodule InventoryApiWeb.ProductsController do
   use InventoryApiWeb, :controller
 
-  alias InventoryApi.Catalog
-  alias InventoryApi.Catalog.Products
+  alias InventoryApi.Services.ProductService
 
   action_fallback InventoryApiWeb.FallbackController
 
-  def index(conn, _params) do
-    products = Catalog.list_products()
-    render(conn, :index, products: products)
-  end
-
-  def create(conn, %{"products" => products_params}) do
-    with {:ok, %Products{} = products} <- Catalog.create_products(products_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/products/#{products}")
-      |> render(:show, products: products)
+  def create(conn, %{"product" => product_params}) do
+    case ProductService.create_product(product_params) do
+      {:ok, product} ->
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", ~p"/api/products/#{product.id}")
+        |> render("show.json", product: product)
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render("error.json", changeset: changeset)
     end
   end
 
   def show(conn, %{"id" => id}) do
-    products = Catalog.get_products!(id)
-    render(conn, :show, products: products)
+    case ProductService.get_product(id) do
+      {:ok, product} ->
+        render(conn, "show.json", product: product)
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Product not found"})
+    end
   end
 
-  def update(conn, %{"id" => id, "products" => products_params}) do
-    products = Catalog.get_products!(id)
-
-    with {:ok, %Products{} = products} <- Catalog.update_products(products, products_params) do
-      render(conn, :show, products: products)
+  def update(conn, %{"id" => id, "product" => product_params}) do
+    case ProductService.update_product(id, product_params) do
+      {:ok, updated_product} ->
+        render(conn, "show.json", product: updated_product)
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Product not found"})
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render("error.json", changeset: changeset)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    products = Catalog.get_products!(id)
-
-    with {:ok, %Products{}} <- Catalog.delete_products(products) do
-      send_resp(conn, :no_content, "")
+    case ProductService.delete_product(id) do
+      {:ok, _deleted_product} ->
+        send_resp(conn, :no_content, "")
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Product not found"})
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: reason})
     end
   end
 end

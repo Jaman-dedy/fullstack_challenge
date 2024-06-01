@@ -18,7 +18,7 @@ defmodule InventoryApiWeb.ProductsJSON do
   defp data(%Products{} = products) do
     %{
       id: products.id,
-      product_name: products.product_name,
+      product_name: products.name,
       mass_kg: products.mass_kg
     }
   end

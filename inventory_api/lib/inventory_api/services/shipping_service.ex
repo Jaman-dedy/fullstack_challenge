@@ -1,6 +1,6 @@
 defmodule InventoryApi.Services.ShippingService do
   use GenServer
-  alias InventoryApi.Shippings.Shipping
+  alias InventoryApi.Shipping.Shippings
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -8,6 +8,10 @@ defmodule InventoryApi.Services.ShippingService do
 
   def init(state) do
     {:ok, state}
+  end
+
+  def ship_package(shipment_params) do
+    GenServer.call(__MODULE__, {:ship_package, shipment_params})
   end
 
   def create_shipping(attrs \\ %{}) do
@@ -22,18 +26,44 @@ defmodule InventoryApi.Services.ShippingService do
     GenServer.call(__MODULE__, {:update_shipping, id, attrs})
   end
 
+  def handle_call({:ship_package, shipment_params}, _from, state) do
+    case Shippings.create_shipping(shipment_params) do
+      {:ok, shipping} ->
+        {:reply, {:ok, shipping}, state}
+      {:error, changeset} ->
+        {:reply, {:error, changeset}, state}
+    end
+  end
+
   def handle_call({:create_shipping, attrs}, _from, state) do
-    shipping = Shipping.create_shipping(attrs)
-    {:reply, shipping, state}
+    case Shippings.create_shipping(attrs) do
+      {:ok, shipping} ->
+        {:reply, {:ok, shipping}, state}
+      {:error, changeset} ->
+        {:reply, {:error, changeset}, state}
+    end
   end
 
   def handle_call({:get_shipping, id}, _from, state) do
-    shipping = Shipping.get_shipping(id)
-    {:reply, shipping, state}
+    case Shippings.get_shipping(id) do
+      nil ->
+        {:reply, {:error, :not_found}, state}
+      shipping ->
+        {:reply, {:ok, shipping}, state}
+    end
   end
 
   def handle_call({:update_shipping, id, attrs}, _from, state) do
-    shipping = Shipping.update_shipping(id, attrs)
-    {:reply, shipping, state}
+    case Shippings.get_shipping(id) do
+      nil ->
+        {:reply, {:error, :not_found}, state}
+      shipping ->
+        case Shippings.update_shipping(shipping, attrs) do
+          {:ok, updated_shipping} ->
+            {:reply, {:ok, updated_shipping}, state}
+          {:error, changeset} ->
+            {:reply, {:error, changeset}, state}
+        end
+    end
   end
 end

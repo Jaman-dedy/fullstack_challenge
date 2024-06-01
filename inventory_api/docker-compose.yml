@@ -9,9 +9,14 @@ services:
       POSTGRES_DB: inventory_api_dev
     volumes:
       - db_data:/var/lib/postgresql/data
+    ports:
+    - "5432:5432"
 
   web:
     build: .
+    command: sh -c "mix ecto.migrate && mix phx.server"
+    volumes:
+      - ./:/app
     environment:
       DATABASE_URL: ecto://postgres:postgres@db/inventory_api_dev
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}

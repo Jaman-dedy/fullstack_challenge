@@ -1,10 +1,11 @@
 defmodule InventoryApi.Restock.Restocks do
   use Ecto.Schema
   import Ecto.Changeset
+  alias InventoryApi.Repo
 
   schema "restocks" do
+    field :product_id, :integer
     field :quantity, :integer
-    field :product_id, :id
 
     timestamps(type: :utc_datetime)
   end
@@ -12,7 +13,17 @@ defmodule InventoryApi.Restock.Restocks do
   @doc false
   def changeset(restocks, attrs) do
     restocks
-    |> cast(attrs, [:quantity])
-    |> validate_required([:quantity])
+    |> cast(attrs, [:product_id, :quantity])
+    |> validate_required([:product_id, :quantity])
+  end
+
+  def create_restock(attrs \\ %{}) do
+    %__MODULE__{}
+    |> changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_restock(id) do
+    Repo.get(__MODULE__, id)
   end
 end

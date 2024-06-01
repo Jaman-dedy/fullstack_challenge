@@ -9,7 +9,6 @@ defmodule InventoryApi.Application do
       {DNSCluster, query: Application.get_env(:inventory_api, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: InventoryApi.PubSub},
       {Finch, name: InventoryApi.Finch},
-      {Phoenix.PubSub, name: InventoryApi.PubSub},
       InventoryApiWeb.Endpoint,
       {InventoryApi.Services.InventoryService, []},
       {InventoryApi.Services.OrderService, []},

@@ -1,8 +1,8 @@
 defmodule InventoryApiWeb.InventoriesController do
   use InventoryApiWeb, :controller
 
-  alias InventoryApi.Inventory
   alias InventoryApi.Inventory.Inventories
+  alias InventoryApi.Services.InventoryService
 
   action_fallback InventoryApiWeb.FallbackController
 
@@ -19,7 +19,7 @@ defmodule InventoryApiWeb.InventoriesController do
 
   def process_restock(conn, %{"restock" => restock_params}) do
     case InventoryService.process_restock(restock_params) do
-      :ok ->
+      {:ok, :restock_processed} ->
         send_resp(conn, :ok, "")
       {:error, reason} ->
         conn
@@ -29,37 +29,68 @@ defmodule InventoryApiWeb.InventoriesController do
   end
 
   def index(conn, _params) do
-    inventories = Inventory.list_inventories()
-    render(conn, :index, inventories: inventories)
+    inventories = Inventories.list_inventories()
+    render(conn, "index.json", inventories: inventories)
   end
 
-  def create(conn, %{"inventories" => inventories_params}) do
-    with {:ok, %Inventories{} = inventories} <- Inventory.create_inventories(inventories_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/inventories/#{inventories}")
-      |> render(:show, inventories: inventories)
+  def create(conn, %{"inventory" => inventory_params}) do
+    case Inventories.create_inventory(inventory_params) do
+      {:ok, inventory} ->
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", ~p"/api/inventories/#{inventory.id}")
+        |> render("show.json", inventory: inventory)
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render("error.json", changeset: changeset)
     end
   end
 
   def show(conn, %{"id" => id}) do
-    inventories = Inventory.get_inventories!(id)
-    render(conn, :show, inventories: inventories)
+    case Inventories.get_inventory(id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Inventory not found"})
+      inventory ->
+        render(conn, "show.json", inventory: inventory)
+    end
   end
 
-  def update(conn, %{"id" => id, "inventories" => inventories_params}) do
-    inventories = Inventory.get_inventories!(id)
-
-    with {:ok, %Inventories{} = inventories} <- Inventory.update_inventories(inventories, inventories_params) do
-      render(conn, :show, inventories: inventories)
+  def update(conn, %{"id" => id, "inventory" => inventory_params}) do
+    case Inventories.get_inventory(id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Inventory not found"})
+      inventory ->
+        case Inventories.update_inventory(inventory, inventory_params) do
+          {:ok, updated_inventory} ->
+            render(conn, "show.json", inventory: updated_inventory)
+          {:error, changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> render("error.json", changeset: changeset)
+        end
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    inventories = Inventory.get_inventories!(id)
-
-    with {:ok, %Inventories{}} <- Inventory.delete_inventories(inventories) do
-      send_resp(conn, :no_content, "")
+    case Inventories.get_inventory(id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Inventory not found"})
+      inventory ->
+        case Inventories.delete_inventory(inventory) do
+          {:ok, _deleted_inventory} ->
+            send_resp(conn, :no_content, "")
+          {:error, reason} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: reason})
+        end
     end
   end
 end
