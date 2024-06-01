@@ -23,25 +23,16 @@ defmodule InventoryApiWeb.Router do
   scope "/api", InventoryApiWeb do
     pipe_through :api
 
-    # Inventory endpoints
-    post "/init_catalog", InventoryController, :create
+    resources "/products", ProductController, except: [:new, :edit]
+    resources "/inventories", InventoryController, except: [:new, :edit]
+    resources "/orders", OrderController, except: [:new, :edit]
+    resources "/shippings", ShippingController, except: [:new, :edit]
+    resources "/restocks", RestockController, except: [:new, :edit]
+
+    post "/init_catalog", InventoryController, :init_catalog
     post "/process_restock", InventoryController, :process_restock
-    post "/inventory", InventoryController, :create
-    get "/inventory/:id", InventoryController, :show
-    put "/inventory/:id", InventoryController, :update
-
-    # Order endpoints
     post "/process_order", OrderController, :process_order
-    post "/orders", OrderController, :create
-    get "/orders/:id", OrderController, :show
-    put "/orders/:id", OrderController, :update
-
-    # Shipping endpoints
     post "/ship_package", ShippingController, :ship_package
-    post "/shipping", ShippingController, :create
-    get "/shipping/:id", ShippingController, :show
-    put "/shipping/:id", ShippingController, :update
-
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

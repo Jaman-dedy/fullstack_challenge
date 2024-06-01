@@ -1,6 +1,7 @@
-FROM elixir:1.12.0-alpine
+FROM elixir:latest
 
-RUN apk add --no-cache build-base postgresql-client
+RUN apt-get update && \
+  apt-get install -y postgresql-client
 
 WORKDIR /app
 

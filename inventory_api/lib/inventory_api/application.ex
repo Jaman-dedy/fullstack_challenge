@@ -13,7 +13,9 @@ defmodule InventoryApi.Application do
       InventoryApiWeb.Endpoint,
       {InventoryApi.Services.InventoryService, []},
       {InventoryApi.Services.OrderService, []},
-      {InventoryApi.Services.ShippingService, []}
+      {InventoryApi.Services.ShippingService, []},
+      {InventoryApi.Services.RestockService, []}
+
     ]
 
     opts = [strategy: :one_for_one, name: InventoryApi.Supervisor]
