@@ -26,6 +26,10 @@ defmodule InventoryApi.Services.ProductService do
     GenServer.call(__MODULE__, {:delete_product, id})
   end
 
+  def list_products() do
+    GenServer.call(__MODULE__, :list_products)
+  end
+
   def handle_call({:create_product, attrs}, _from, state) do
     case Products.create_product(attrs) do
       {:ok, product} ->
@@ -69,6 +73,13 @@ defmodule InventoryApi.Services.ProductService do
           {:error, reason} ->
             {:reply, {:error, reason}, state}
         end
+    end
+  end
+
+  def handle_call(:list_products, _from, state) do
+    case Products.list_products() do
+      products ->
+        {:reply, {:ok, products}, state}
     end
   end
 end

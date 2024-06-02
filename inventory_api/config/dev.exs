@@ -15,11 +15,11 @@ config :inventory_api, InventoryApiWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "REr0ZwcWki7DSIbTpSj0gxp1+O8p71NKtGpc2Fw8YOWndgHt1sonRV6TXxfRFjBT",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:inventory_api, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:inventory_api, ~w(--watch)]}
-  ]
+  secret_key_base: "REr0ZwcWki7DSIbTpSj0gxp1+O8p71NKtGpc2Fw8YOWndgHt1sonRV6TXxfRFjBT"
+  # watchers: [
+  #   esbuild: {Esbuild, :install_and_run, [:inventory_api, ~w(--sourcemap=inline --watch)]},
+  #   tailwind: {Tailwind, :install_and_run, [:inventory_api, ~w(--watch)]}
+  # ]
 
 config :inventory_api, InventoryApiWeb.Endpoint,
   live_reload: [

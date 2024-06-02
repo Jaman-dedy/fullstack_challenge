@@ -1,21 +1,24 @@
 defmodule InventoryApi.Inventory.Inventories do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias InventoryApi.Repo
+  alias InventoryApi.Catalog.Products
 
   schema "inventories" do
     field :quantity, :integer
-    field :product_id, :id
+    belongs_to :products, Products
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(inventories, attrs) do
-    inventories
+  def changeset(inventory, attrs) do
+    inventory
     |> cast(attrs, [:quantity, :product_id])
     |> validate_required([:quantity, :product_id])
     |> foreign_key_constraint(:product_id)
+    |> check_constraint(:quantity, name: :non_negative_quantity, message: "Quantity must be non-negative")
   end
 
   def create_inventory(attrs \\ %{}) do
@@ -35,7 +38,7 @@ defmodule InventoryApi.Inventory.Inventories do
   end
 
   def get_inventory_by_product(product_id) do
-    Repo.get_by(__MODULE__, product_id: product_id)
+    Repo.one(from i in __MODULE__, where: i.product_id == ^product_id)
   end
 
   def update_inventory_quantity(product_id, quantity) do
@@ -55,11 +58,11 @@ defmodule InventoryApi.Inventory.Inventories do
     Repo.all(__MODULE__)
   end
 
-  # def update_product_quantity(product_id, quantity) do
-  #   from(i in __MODULE__,
-  #     where: i.product_id == ^product_id,
-  #     update: [set: [quantity: i.quantity + ^quantity]]
-  #   )
-  #   |> Repo.update_all([])
-  # end
+  def update_product_quantity(product_id, quantity) do
+    from(i in __MODULE__,
+      where: i.product_id == ^product_id,
+      update: [set: [quantity: i.quantity + ^quantity]]
+    )
+    |> Repo.update_all([])
+  end
 end

@@ -8,12 +8,35 @@ defmodule InventoryApiWeb.InventoriesController do
 
   def init_catalog(conn, %{"product_info" => product_info}) do
     case InventoryService.init_catalog(product_info) do
-      {:ok, inventory} ->
-        render(conn, "init_catalog.json", inventory: inventory)
-      {:error, reason} ->
+      {:ok, :catalog_initialized} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{message: "Product catalog initialized successfully"})
+
+      {:error, :empty_catalog} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{error: reason})
+        |> json(%{message: "Empty product catalog"})
+
+      {:error, :duplicate_product_id} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{message: "Duplicate product_id found"})
+
+      {:error, :invalid_mass_kg} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{message: "Invalid mass_kg value"})
+
+      {:error, :invalid_product_name} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{message: "Missing or invalid product_name"})
+
+      {:error, :invalid_product_id} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{message: "Missing or invalid product_id"})
     end
   end
 

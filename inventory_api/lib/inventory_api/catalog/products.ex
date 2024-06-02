@@ -2,29 +2,54 @@ defmodule InventoryApi.Catalog.Products do
   use Ecto.Schema
   import Ecto.Changeset
   alias InventoryApi.Repo
+  alias InventoryApi.Inventory.Inventories
 
   schema "products" do
-    field :name, :string
+    field :product_name, :string
     field :mass_kg, :float
+    field :product_id, :integer
+    has_many :inventories, Inventories
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(products, attrs) do
-    products
-    |> cast(attrs, [:name, :mass_kg])
-    |> validate_required([:name, :mass_kg])
+  def changeset(product, attrs) do
+    product
+    |> cast(attrs, [:product_name, :mass_kg, :product_id])
+    |> validate_required([:product_name, :mass_kg, :product_id])
+    |> validate_number(:mass_kg, greater_than: 0)
+    |> validate_number(:product_id, greater_than_or_equal_to: 0)
+    |> unique_constraint(:product_name)
+    |> unique_constraint(:product_id)
   end
 
   def create_product(attrs \\ %{}) do
-    %__MODULE__{}
-    |> changeset(attrs)
-    |> Repo.insert()
+    IO.puts("+++ Before inserting product: ++++")
+    IO.inspect(attrs)
+
+    result = %__MODULE__{}
+             |> changeset(attrs)
+             |> Repo.insert()
+
+    case result do
+      {:ok, product} ->
+        IO.puts("----Product inserted successfully ---:")
+        IO.inspect(product)
+        {:ok, product}
+      {:error, changeset} ->
+        IO.puts("++++Error inserting product: ++++")
+        IO.inspect(changeset)
+        {:error, changeset}
+    end
   end
 
   def get_product(id) do
     Repo.get(__MODULE__, id)
+  end
+
+  def get_product_by_name(name) do
+    Repo.get_by(__MODULE__, name: name)
   end
 
   def update_product(%__MODULE__{} = product, attrs) do
@@ -35,5 +60,9 @@ defmodule InventoryApi.Catalog.Products do
 
   def delete_product(%__MODULE__{} = product) do
     Repo.delete(product)
+  end
+
+  def list_products() do
+    Repo.all(__MODULE__)
   end
 end

@@ -1,6 +1,7 @@
 defmodule InventoryApi.Services.InventoryService do
   use GenServer
   alias InventoryApi.Inventory.Inventories
+  alias InventoryApi.Catalog.Products
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -32,27 +33,33 @@ defmodule InventoryApi.Services.InventoryService do
 
   # Callback functions
 
-  # def handle_call({:init_catalog, product_info}, _from, state) do
-  #   # Implement the logic to initialize the catalog
-  #   # Example:
-  #   Enum.each(product_info, fn product ->
-  #     Inventories.create_product(product)
-  #   end)
+  def handle_call({:init_catalog, product_info}, _from, state) do
+    cond do
+      not is_list(product_info) ->
+        {:reply, {:error, :invalid_payload}, state}
 
-  #   {:reply, {:ok, :catalog_initialized}, state}
-  # end
+      length(product_info) == 0 ->
+        {:reply, {:error, :empty_catalog}, state}
 
-  # def handle_call({:process_restock, restock_params}, _from, state) do
-  #   # Implement the logic to process the restock
-  #   # Example:
-  #   Enum.each(restock_params, fn restock ->
-  #     product_id = restock["product_id"]
-  #     quantity = restock["quantity"]
-  #     Inventories.update_product_quantity(product_id, quantity)
-  #   end)
+      has_duplicate_product_ids?(product_info) ->
+        {:reply, {:error, :duplicate_product_id}, state}
 
-  #   {:reply, {:ok, :restock_processed}, state}
-  # end
+      has_invalid_mass_kg?(product_info) ->
+        {:reply, {:error, :invalid_mass_kg}, state}
+
+      has_invalid_product_name?(product_info) ->
+        {:reply, {:error, :invalid_product_name}, state}
+
+      has_invalid_product_id?(product_info) ->
+        {:reply, {:error, :invalid_product_id}, state}
+
+      true ->
+        Enum.each(product_info, fn product ->
+          Products.create_product(product)
+        end)
+        {:reply, {:ok, :catalog_initialized}, state}
+    end
+  end
 
   def handle_call({:create_inventory, attrs}, _from, state) do
     case Inventories.create_inventory(attrs) do
@@ -85,4 +92,28 @@ defmodule InventoryApi.Services.InventoryService do
         end
     end
   end
+
+  defp has_duplicate_product_ids?(product_info) do
+    product_ids = Enum.map(product_info, & &1["product_id"])
+    length(Enum.uniq(product_ids)) != length(product_ids)
+  end
+
+  defp has_invalid_mass_kg?(product_info) do
+    Enum.any?(product_info, fn product ->
+      not is_number(product["mass_kg"]) or product["mass_kg"] <= 0
+    end)
+  end
+
+  defp has_invalid_product_name?(product_info) do
+    Enum.any?(product_info, fn product ->
+      not is_binary(product["product_name"]) or product["product_name"] == ""
+    end)
+  end
+
+  defp has_invalid_product_id?(product_info) do
+    Enum.any?(product_info, fn product ->
+      not is_integer(product["product_id"]) or product["product_id"] < 0
+    end)
+  end
+
 end

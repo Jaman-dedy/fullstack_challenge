@@ -19,6 +19,17 @@ defmodule InventoryApiWeb.ProductsController do
     end
   end
 
+  def index(conn, _params) do
+    case ProductService.list_products() do
+      {:ok, products} ->
+        render(conn, "index.json", products: products)
+      {:error, reason} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: reason})
+    end
+  end
+
   def show(conn, %{"id" => id}) do
     case ProductService.get_product(id) do
       {:ok, product} ->
