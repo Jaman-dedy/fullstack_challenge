@@ -6,16 +6,38 @@ defmodule InventoryApiWeb.ShippingsController do
 
   action_fallback InventoryApiWeb.FallbackController
 
+  defp validate_shipment_params(shipment_params) do
+    cond do
+      !Map.has_key?(shipment_params, "shipped") ->
+        {:error, "Missing shipped parameter"}
+      !is_list(shipment_params["shipped"]) ->
+        {:error, "Shipped parameter must be a list"}
+      true ->
+        {:ok, shipment_params}
+    end
+  end
+
   def ship_package(conn, %{"shipment" => shipment_params}) do
-    case ShippingService.ship_package(shipment_params) do
-      {:ok, shipping} ->
+    case validate_shipment_params(shipment_params) do
+      {:ok, shipment_params} ->
+        case ShippingService.ship_package(shipment_params) do
+          :ok ->
+            conn
+            |> put_status(:ok)
+            |> json(%{message: "Package shipped successfully"})
+          {:error, :invalid_shipment} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: "Invalid shipment"})
+          {:error, :order_not_found} ->
+            conn
+            |> put_status(:not_found)
+            |> json(%{error: "Order not found"})
+        end
+      {:error, reason} ->
         conn
-        |> put_status(:created)
-        |> render("show.json", shipping: shipping)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render("error.json", changeset: changeset)
+        |> put_status(:bad_request)
+        |> json(%{error: reason})
     end
   end
 

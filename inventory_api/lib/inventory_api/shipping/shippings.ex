@@ -15,6 +15,24 @@ defmodule InventoryApi.Shipping.Shippings do
     shippings
     |> cast(attrs, [:shipped, :order_id])
     |> validate_required([:shipped, :order_id])
+    |> validate_shipment()
+  end
+
+  defp validate_shipment(changeset) do
+    shipped_items = get_field(changeset, :shipped)
+    if is_list(shipped_items) and length(shipped_items) > 0 do
+      if Enum.all?(shipped_items, &is_valid_item?/1) do
+        changeset
+      else
+        add_error(changeset, :shipped, "Invalid shipped items")
+      end
+    else
+      add_error(changeset, :shipped, "Shipped items must be a non-empty list")
+    end
+  end
+
+  defp is_valid_item?(item) do
+    is_map(item) and Map.has_key?(item, "product_id") and Map.has_key?(item, "quantity")
   end
 
   def create_shipping(attrs \\ %{}) do

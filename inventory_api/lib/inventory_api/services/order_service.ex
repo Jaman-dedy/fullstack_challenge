@@ -1,6 +1,7 @@
 defmodule InventoryApi.Services.OrderService do
   use GenServer
   alias InventoryApi.Order.Orders
+  alias InventoryApi.Inventory.Inventories
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -27,11 +28,17 @@ defmodule InventoryApi.Services.OrderService do
   end
 
   def handle_call({:process_order, order_params}, _from, state) do
-    case Orders.create_order(order_params) do
+    case validate_order(order_params) do
       {:ok, order} ->
-        {:reply, {:ok, order}, state}
-      {:error, changeset} ->
-        {:reply, {:error, changeset}, state}
+        requested_items = order["requested"]
+        case create_order_items(order["order_id"], requested_items) do
+          {:ok, _order_items} ->
+            {:reply, {:ok, "Order created successfully"}, state}
+          {:error, :insufficient_inventory} ->
+            {:reply, {:error, :insufficient_inventory}, state}
+        end
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -64,6 +71,59 @@ defmodule InventoryApi.Services.OrderService do
           {:error, changeset} ->
             {:reply, {:error, changeset}, state}
         end
+    end
+  end
+
+  defp validate_order(order_params) do
+    case Map.has_key?(order_params, "order_id") do
+      true ->
+        case Map.has_key?(order_params, "requested") do
+          true ->
+            requested_items = order_params["requested"]
+            case is_list(requested_items) and length(requested_items) > 0 do
+              true ->
+                valid_items? = Enum.all?(requested_items, fn item ->
+                  is_map(item) and Map.has_key?(item, "product_id") and Map.has_key?(item, "quantity")
+                end)
+                if valid_items? do
+                  {:ok, order_params}
+                else
+                  {:error, :invalid_requested_items}
+                end
+              false ->
+                {:error, :empty_requested_items}
+            end
+          false ->
+            {:error, :missing_requested_items}
+        end
+      false ->
+        {:error, :missing_order_id}
+    end
+  end
+
+  defp create_order_items(order_id, requested_items) do
+    # Check if all requested items are available in the inventory
+    available? = Enum.all?(requested_items, fn item ->
+      product_id = item["product_id"]
+      quantity = item["quantity"]
+      case Inventories.get_inventory_by_product_id(product_id) do
+        nil -> false
+        inventory -> inventory.quantity >= quantity
+      end
+    end)
+
+    if available? do
+      # Create individual order items in the order table
+      Enum.each(requested_items, fn item ->
+        product_id = item["product_id"]
+        quantity = item["quantity"]
+        attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "pending"}
+        Orders.create_order_item(attrs)
+      end)
+
+      {:ok, "Order items created successfully"}
+    else
+      {:error, :insufficient_inventory}
     end
   end
 end

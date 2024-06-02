@@ -18,7 +18,6 @@ defmodule InventoryApiWeb.OrdersJSON do
   defp data(%Orders{} = orders) do
     %{
       id: orders.id,
-      requested: orders.requested
     }
   end
 end

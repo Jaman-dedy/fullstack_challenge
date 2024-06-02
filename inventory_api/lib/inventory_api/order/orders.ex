@@ -2,22 +2,31 @@ defmodule InventoryApi.Order.Orders do
   use Ecto.Schema
   import Ecto.Changeset
   alias InventoryApi.Repo
+  alias InventoryApi.Catalog.Products
 
   schema "orders" do
     field :order_id, :integer
-    field :requested, {:array, :map}
-
+    field :quantity, :integer
+    field :status, :string, default: "pending"
+    belongs_to :product, Products
     timestamps(type: :utc_datetime)
   end
 
   @doc false
   def changeset(orders, attrs) do
     orders
-    |> cast(attrs, [:order_id, :requested])
-    |> validate_required([:order_id, :requested])
+    |> cast(attrs, [:order_id, :product_id, :quantity, :status])
+    |> validate_required([:order_id, :product_id, :quantity])
+    |> foreign_key_constraint(:product_id)
   end
 
   def create_order(attrs \\ %{}) do
+    %__MODULE__{}
+    |> changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_order_item(attrs \\ %{}) do
     %__MODULE__{}
     |> changeset(attrs)
     |> Repo.insert()
