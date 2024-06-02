@@ -45,6 +45,15 @@ defmodule InventoryApiWeb.InventoriesController do
     end
   end
 
+  def re_init_catalog(conn, _params) do
+    case InventoryService.reinitialize_catalog() do
+      {:ok, :catalog_reinitialized} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{message: "Product catalog reinitialized successfully"})
+    end
+  end
+
   def process_restock(conn, %{"restock" => restock_params}) do
     case InventoryService.process_restock(restock_params) do
       {:ok, :restock_processed} ->

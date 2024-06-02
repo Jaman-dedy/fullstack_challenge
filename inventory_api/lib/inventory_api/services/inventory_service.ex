@@ -7,12 +7,16 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def init(state) do
+  def init(_state) do
     {:ok, %{catalog_initialized: false}}
   end
 
   def init_catalog(product_info) do
     GenServer.call(__MODULE__, {:init_catalog, product_info})
+  end
+
+  def reinitialize_catalog() do
+    GenServer.call(__MODULE__, {:reinitialize_catalog, nil})
   end
 
   def process_restock(restock_params) do
@@ -31,9 +35,10 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.call(__MODULE__, {:update_inventory, id, attrs})
   end
 
+
   # Callback functions
 
-  def handle_call({:init_catalog, product_info}, _from, %{catalog_initialized: true} = state) do
+  def handle_call({:init_catalog, _product_info}, _from, %{catalog_initialized: true} = state) do
     {:reply, {:error, :catalog_already_initialized}, state}
   end
 
@@ -63,6 +68,10 @@ defmodule InventoryApi.Services.InventoryService do
         end)
         {:reply, {:ok, :catalog_initialized}, %{state | catalog_initialized: true}}
     end
+  end
+
+  def handle_call({:reinitialize_catalog, _product_info}, _from, state) do
+    {:reply, {:ok, :catalog_reinitialized}, %{state | catalog_initialized: false}}
   end
 
   def handle_call({:create_inventory, attrs}, _from, state) do

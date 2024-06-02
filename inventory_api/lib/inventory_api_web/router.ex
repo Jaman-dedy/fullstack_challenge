@@ -30,6 +30,7 @@ defmodule InventoryApiWeb.Router do
     resources "/restocks", RestocksController, except: [:new, :edit]
 
     post "/init_catalog", InventoriesController, :init_catalog
+    post "/re_init_catalog", InventoriesController, :re_init_catalog
     post "/process_restock", InventoriesController, :process_restock
     post "/process_order", OrdersController, :process_order
     post "/ship_package", ShippingsController, :ship_package

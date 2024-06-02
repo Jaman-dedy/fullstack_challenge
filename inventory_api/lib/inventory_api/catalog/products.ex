@@ -25,8 +25,6 @@ defmodule InventoryApi.Catalog.Products do
   end
 
   def create_product(attrs \\ %{}) do
-    IO.puts("+++ Before inserting product: ++++")
-    IO.inspect(attrs)
 
     result = %__MODULE__{}
              |> changeset(attrs)
@@ -34,12 +32,8 @@ defmodule InventoryApi.Catalog.Products do
 
     case result do
       {:ok, product} ->
-        IO.puts("----Product inserted successfully ---:")
-        IO.inspect(product)
         {:ok, product}
       {:error, changeset} ->
-        IO.puts("++++Error inserting product: ++++")
-        IO.inspect(changeset)
         {:error, changeset}
     end
   end
