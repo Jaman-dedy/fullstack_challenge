@@ -1,6 +1,7 @@
 defmodule InventoryApi.Order.Orders do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias InventoryApi.Repo
   alias InventoryApi.Catalog.Products
 
@@ -36,8 +37,22 @@ defmodule InventoryApi.Order.Orders do
     Repo.get(__MODULE__, id)
   end
 
+  def get_order_item_by_order_and_product(order_id, product_id) do
+    Repo.one(
+      from order_item in __MODULE__,
+      where: order_item.order_id == ^order_id and order_item.product_id == ^product_id,
+      limit: 1
+    )
+  end
+
   def update_order(%__MODULE__{} = order, attrs) do
     order
+    |> changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_order_item(%__MODULE__{} = order_item, attrs) do
+    order_item
     |> changeset(attrs)
     |> Repo.update()
   end

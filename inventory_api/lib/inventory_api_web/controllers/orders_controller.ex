@@ -6,28 +6,43 @@ defmodule InventoryApiWeb.OrdersController do
 
   action_fallback InventoryApiWeb.FallbackController
 
-  def process_order(conn, %{"order_id" => order_id, "requested" => requested}) do
-    order_params = %{"order_id" => order_id, "requested" => requested}
-    case validate_order_params(order_params) do
-      {:ok, order_params} ->
-        case OrderService.process_order(order_params) do
-          {:ok, message} ->
+  def process_order(conn, %{"requested" => requested} = params) do
+    case Map.fetch(params, "order_id") do
+      {:ok, order_id} ->
+        order_params = %{"order_id" => order_id, "requested" => requested}
+        case validate_order_params(order_params) do
+          {:ok, order_params} ->
+            case OrderService.process_order(order_params) do
+              {:ok, message} ->
+                conn
+                |> put_status(:ok)
+                |> json(%{message: message})
+              {:error, :invalid_order} ->
+                conn
+                |> put_status(:unprocessable_entity)
+                |> json(%{error: "Invalid order"})
+              {:error, :insufficient_inventory} ->
+                conn
+                |> put_status(:unprocessable_entity)
+                |> json(%{error: "Insufficient inventory"})
+            end
+          {:error, "Invalid product_id or quantity in requested items"} ->
             conn
-            |> put_status(:ok)
-            |> json(%{message: message})
-          {:error, :invalid_order} ->
+            |> put_status(:bad_request)
+            |> json(%{error: "Invalid product_id or quantity in requested items"})
+          {:error, :empty_requested_items} ->
             conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{error: "Invalid order"})
-          {:error, :insufficient_inventory} ->
+            |> put_status(:bad_request)
+            |> json(%{error: "Empty requested items"})
+          {:error, reason} ->
             conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{error: "Insufficient inventory"})
+            |> put_status(:bad_request)
+            |> json(%{error: reason})
         end
-      {:error, reason} ->
+      :error ->
         conn
         |> put_status(:bad_request)
-        |> json(%{error: reason})
+        |> json(%{error: "Missing order_id parameter"})
     end
   end
 
@@ -116,8 +131,32 @@ defmodule InventoryApiWeb.OrdersController do
         {:error, "Missing requested parameter"}
       !is_list(order_params["requested"]) ->
         {:error, "Requested parameter must be a list"}
+      order_params["requested"] == [] ->
+        {:error, :empty_requested_items}
+      !all_items_valid?(order_params["requested"]) ->
+        {:error, "Invalid product_id or quantity in requested items"}
       true ->
         {:ok, order_params}
+    end
+  end
+
+  defp all_items_valid?(requested_items) do
+    Enum.all?(requested_items, fn item ->
+      is_valid_item?(item)
+    end)
+  end
+
+  defp is_valid_item?(item) do
+    with true <- is_map(item),
+         true <- Map.has_key?(item, "product_id"),
+         true <- Map.has_key?(item, "quantity"),
+         {product_id, ""} <- Integer.parse(to_string(item["product_id"])),
+         {quantity, ""} <- Integer.parse(to_string(item["quantity"])),
+         true <- is_integer(product_id) and product_id > 0,
+         true <- is_integer(quantity) and quantity > 0 do
+      true
+    else
+      _ -> false
     end
   end
 

@@ -113,12 +113,28 @@ defmodule InventoryApi.Services.OrderService do
     end)
 
     if available? do
-      # Create individual order items in the order table
+      # Create or update order items and update inventory quantities
       Enum.each(requested_items, fn item ->
         product_id = item["product_id"]
         quantity = item["quantity"]
-        attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "pending"}
-        Orders.create_order_item(attrs)
+
+        # Check if an order item with the same order_id and product_id already exists
+
+        case Orders.get_order_item_by_order_and_product(order_id, product_id) do
+          nil ->
+            # Create a new order item
+            attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "pending"}
+            {:ok, _order_item} = Orders.create_order_item(attrs)
+          order_item ->
+            # Update the quantity of the existing order item
+            updated_quantity = order_item.quantity + quantity
+            Orders.update_order_item(order_item, %{quantity: updated_quantity})
+        end
+
+        # Update the inventory quantity
+        inventory = Inventories.get_inventory_by_product_id(product_id)
+        updated_quantity = inventory.quantity - quantity
+        Inventories.update_inventory(inventory, %{quantity: updated_quantity})
       end)
 
       {:ok, "Order items created successfully"}
