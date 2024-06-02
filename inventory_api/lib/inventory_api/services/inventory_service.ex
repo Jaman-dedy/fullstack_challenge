@@ -8,7 +8,7 @@ defmodule InventoryApi.Services.InventoryService do
   end
 
   def init(state) do
-    {:ok, state}
+    {:ok, %{catalog_initialized: false}}
   end
 
   def init_catalog(product_info) do
@@ -32,6 +32,10 @@ defmodule InventoryApi.Services.InventoryService do
   end
 
   # Callback functions
+
+  def handle_call({:init_catalog, product_info}, _from, %{catalog_initialized: true} = state) do
+    {:reply, {:error, :catalog_already_initialized}, state}
+  end
 
   def handle_call({:init_catalog, product_info}, _from, state) do
     cond do
@@ -57,7 +61,7 @@ defmodule InventoryApi.Services.InventoryService do
         Enum.each(product_info, fn product ->
           Products.create_product(product)
         end)
-        {:reply, {:ok, :catalog_initialized}, state}
+        {:reply, {:ok, :catalog_initialized}, %{state | catalog_initialized: true}}
     end
   end
 

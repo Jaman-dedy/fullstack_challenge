@@ -13,6 +13,11 @@ defmodule InventoryApiWeb.InventoriesController do
         |> put_status(:ok)
         |> json(%{message: "Product catalog initialized successfully"})
 
+      {:error, :catalog_already_initialized} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{message: "Product catalog has already been initialized"})
+
       {:error, :empty_catalog} ->
         conn
         |> put_status(:unprocessable_entity)
