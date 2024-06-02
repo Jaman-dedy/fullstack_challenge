@@ -54,14 +54,31 @@ defmodule InventoryApiWeb.InventoriesController do
     end
   end
 
-  def process_restock(conn, %{"restock" => restock_params}) do
-    case InventoryService.process_restock(restock_params) do
-      {:ok, :restock_processed} ->
-        send_resp(conn, :ok, "")
-      {:error, reason} ->
+  def process_restock(conn, %{"_json" => restock_params}) when is_list(restock_params) do
+    case InventoryService.is_catalog_initialized?() do
+      true ->
+        case InventoryService.process_restock(restock_params) do
+          :ok ->
+            conn
+            |> put_status(:ok)
+            |> json(%{message: "Restock processed successfully"})
+          {:error, :empty_restock_payload} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Empty restock payload"})
+          {:error, :invalid_product_id} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Invalid product_id"})
+          {:error, :invalid_quantity} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Invalid quantity value"})
+        end
+      false ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{error: reason})
+        |> json(%{message: "Catalog not initialized. Please call init_catalog first."})
     end
   end
 

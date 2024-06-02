@@ -7,7 +7,7 @@ defmodule InventoryApi.Inventory.Inventories do
 
   schema "inventories" do
     field :quantity, :integer
-    belongs_to :products, Products
+    belongs_to :product, Products
 
     timestamps(type: :utc_datetime)
   end
@@ -37,12 +37,12 @@ defmodule InventoryApi.Inventory.Inventories do
     |> Repo.update()
   end
 
-  def get_inventory_by_product(product_id) do
+  def get_inventory_by_product_id(product_id) do
     Repo.one(from i in __MODULE__, where: i.product_id == ^product_id)
   end
 
   def update_inventory_quantity(product_id, quantity) do
-    case get_inventory_by_product(product_id) do
+    case get_inventory_by_product_id(product_id) do
       nil ->
         create_inventory(%{product_id: product_id, quantity: quantity})
       inventory ->

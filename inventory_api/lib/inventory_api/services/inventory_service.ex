@@ -23,6 +23,10 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.call(__MODULE__, {:process_restock, restock_params})
   end
 
+  def is_catalog_initialized?() do
+    GenServer.call(__MODULE__, :is_catalog_initialized)
+  end
+
   def create_inventory(attrs \\ %{}) do
     GenServer.call(__MODULE__, {:create_inventory, attrs})
   end
@@ -72,6 +76,42 @@ defmodule InventoryApi.Services.InventoryService do
 
   def handle_call({:reinitialize_catalog, _product_info}, _from, state) do
     {:reply, {:ok, :catalog_reinitialized}, %{state | catalog_initialized: false}}
+  end
+
+  def handle_call(:is_catalog_initialized, _from, state) do
+    {:reply, state.catalog_initialized, state}
+  end
+
+  def handle_call({:process_restock, restock_params}, _from, state) do
+    cond do
+      not is_list(restock_params) or Enum.empty?(restock_params) ->
+        {:reply, {:error, :empty_restock_payload}, state}
+
+      Enum.any?(restock_params, fn %{"product_id" => product_id} ->
+        not is_integer(product_id) or product_id < 0 or is_nil(Products.get_product(product_id))
+      end) ->
+        {:reply, {:error, :invalid_product_id}, state}
+
+      Enum.any?(restock_params, fn %{"quantity" => quantity} ->
+        not is_integer(quantity) or quantity < 0
+      end) ->
+        {:reply, {:error, :invalid_quantity}, state}
+
+      true ->
+        restock_params
+        |> Enum.each(fn %{"product_id" => product_id, "quantity" => quantity} ->
+          case Inventories.get_inventory_by_product_id(product_id) do
+            nil ->
+              Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
+            inventory ->
+              Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+          end
+        end)
+
+        # TODO: Ship pending orders for the restocked products
+
+        {:reply, :ok, state}
+    end
   end
 
   def handle_call({:create_inventory, attrs}, _from, state) do
