@@ -52,6 +52,27 @@ defmodule InventoryApi.Order.Orders do
     )
   end
 
+  defp get_order_item_by_order_id_and_product_id(order_id, product_id) do
+    Repo.get_by(OrderItem, order_id: order_id, product_id: product_id)
+  end
+
+  def update_order_item_quantity(order_id, product_id, quantity_change) do
+    order_item = get_order_item_by_order_id_and_product_id(order_id, product_id)
+    if order_item do
+      new_quantity = order_item.quantity + quantity_change
+      update_order_item(order_item, %{quantity: new_quantity})
+    else
+      {:error, "Order item not found for order ID #{order_id} and product ID #{product_id}"}
+    end
+  end
+
+  def get_order_items_by_product_ids(product_ids) do
+    Repo.all(
+      from order_item in __MODULE__,
+      where: order_item.product_id in ^product_ids
+    )
+  end
+
   def update_order(%__MODULE__{} = order, attrs) do
     order
     |> changeset(attrs)

@@ -29,11 +29,46 @@ defmodule InventoryApiWeb.ShippingsController do
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: "Package size exceeds the maximum allowed size"})
+      {:error, :empty_shipped_array} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Shipped array cannot be empty"})
+      {:error, :product_not_found} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "One or more products id provided does not have a matching order, please ship what you have ordered"})
+      {:error, reason} when is_binary(reason) ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: reason})
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: inspect(reason)})
+    end
+  end
+
+  def ship_package(conn, %{"shipped" => shipped}) do
+    case ShippingService.ship_package(%{"shipped" => shipped}) do
+      {:error, :missing_order_id} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Missing order_id parameter"})
+      {:error, :empty_shipped_array} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Shipped array cannot be empty"})
       {:error, reason} ->
         conn
         |> put_status(:bad_request)
         |> json(%{error: reason})
     end
+  end
+
+  def ship_package(conn, _params) do
+    conn
+    |> put_status(:bad_request)
+    |> json(%{error: "Invalid parameters"})
   end
 
   def show(conn, %{"id" => id}) do
