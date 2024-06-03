@@ -32,8 +32,8 @@ defmodule InventoryApi.Services.OrderService do
       {:ok, order} ->
         requested_items = order["requested"]
         case create_order_items(order["order_id"], requested_items) do
-          {:ok, _order_items} ->
-            {:reply, {:ok, "Order created successfully"}, state}
+          {:ok, order_items} ->
+            {:reply, {:ok, order_items, "Order created successfully"}, state}
           {:error, :insufficient_inventory} ->
             {:reply, {:error, :insufficient_inventory}, state}
         end
@@ -119,7 +119,6 @@ defmodule InventoryApi.Services.OrderService do
         quantity = item["quantity"]
 
         # Check if an order item with the same order_id and product_id already exists
-
         case Orders.get_order_item_by_order_and_product(order_id, product_id) do
           nil ->
             # Create a new order item
@@ -137,7 +136,9 @@ defmodule InventoryApi.Services.OrderService do
         Inventories.update_inventory(inventory, %{quantity: updated_quantity})
       end)
 
-      {:ok, "Order items created successfully"}
+      # Fetch the created order items
+      order_items = Orders.get_order_items_by_order_id(order_id)
+      {:ok, order_items}
     else
       {:error, :insufficient_inventory}
     end

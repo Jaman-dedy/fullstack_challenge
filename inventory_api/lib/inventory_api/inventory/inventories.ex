@@ -5,6 +5,7 @@ defmodule InventoryApi.Inventory.Inventories do
   alias InventoryApi.Repo
   alias InventoryApi.Catalog.Products
 
+  @derive {Jason.Encoder, only: [:id, :quantity, :product_id, :inserted_at, :updated_at]}
   schema "inventories" do
     field :quantity, :integer
     belongs_to :product, Products

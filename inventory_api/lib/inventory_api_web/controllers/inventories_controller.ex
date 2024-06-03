@@ -5,87 +5,27 @@ defmodule InventoryApiWeb.InventoriesController do
   alias InventoryApi.Inventory.Inventories
   alias InventoryApi.Services.InventoryService
 
-  action_fallback InventoryApiWeb.FallbackController
-
-  # def init_catalog(conn, %{"product_info" => product_info}) do
-  #   case InventoryService.init_catalog(product_info) do
-  #     {:ok, catalog} ->
-  #       conn
-  #       |> put_status(:ok)
-  #       |> json(%{
-  #         status: "success",
-  #         message: "Product catalog initialized successfully",
-  #         catalog: catalog
-  #       })
-
-  #     {:error, :catalog_already_initialized} ->
-  #       conn
-  #       |> put_status(:bad_request)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Product catalog has already been initialized"
-  #       })
-
-  #     {:error, :empty_catalog} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Empty product catalog"
-  #       })
-
-  #     {:error, :duplicate_product_id} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Duplicate product_id found"
-  #       })
-
-  #     {:error, :invalid_mass_kg} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Invalid mass_kg value"
-  #       })
-
-  #     {:error, :invalid_product_name} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Missing or invalid product_name"
-  #       })
-
-  #     {:error, :invalid_product_id} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> json(%{
-  #         status: "error",
-  #         message: "Missing or invalid product_id"
-  #       })
-  #   end
-  # end
+  action_fallback(InventoryApiWeb.FallbackController)
 
   def init_catalog(conn, %{"product_info" => product_info}) do
     case InventoryService.init_catalog(product_info) do
       {:ok, catalog} ->
-        catalog_map = Enum.map(catalog, fn product ->
-          %{
-            id: product.id,
-            product_name: product.product_name,
-            mass_kg: product.mass_kg,
-            product_id: product.product_id
-          }
-        end)
+        catalog_map =
+          Enum.map(catalog, fn product ->
+            %{
+              id: product.id,
+              product_name: product.product_name,
+              mass_kg: product.mass_kg,
+              product_id: product.product_id
+            }
+          end)
 
         conn
         |> put_status(:ok)
         |> json(%{
           status: "success",
           message: "Product catalog initialized successfully",
-          catalog: catalog
+          catalog: catalog_map
         })
 
       {:error, errors} when is_list(errors) ->
@@ -168,27 +108,45 @@ defmodule InventoryApiWeb.InventoriesController do
     case InventoryService.is_catalog_initialized?() do
       true ->
         case InventoryService.process_restock(restock_params) do
-          :ok ->
+          {:ok, inventories} ->
+            inventories_map =
+              inventories
+              |> Enum.group_by(& &1.product_id)
+              |> Enum.map(fn {_product_id, inventories_group} ->
+                inventories_group
+                |> Enum.max_by(& &1.quantity)
+                |> Map.take([:id, :quantity, :product_id, :inserted_at, :updated_at])
+              end)
+
             conn
             |> put_status(:ok)
-            |> json(%{message: "Restock processed successfully"})
+            |> json(%{
+              status: "success",
+              message: "Restock processed successfully",
+              inventories: inventories_map
+            })
+
           {:error, :empty_restock_payload} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Empty restock payload"})
+            |> json(%{status: "error", message: "Empty restock payload"})
+
           {:error, :invalid_product_id} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Invalid or missing product_id"})
+            |> json(%{status: "error", message: "Invalid or missing product_id"})
+
           {:error, :invalid_quantity} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Invalid or missing quantity value"})
+            |> json(%{status: "error", message: "Invalid or missing quantity value"})
+
           {:error, :missing_quantity} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Missing quantity value"})
+            |> json(%{status: "error", message: "Missing quantity value"})
         end
+
       false ->
         conn
         |> put_status(:unprocessable_entity)
@@ -208,6 +166,7 @@ defmodule InventoryApiWeb.InventoriesController do
         |> put_status(:created)
         |> put_resp_header("location", ~p"/api/inventories/#{inventory.id}")
         |> render("show.json", inventory: inventory)
+
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -221,6 +180,7 @@ defmodule InventoryApiWeb.InventoriesController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Inventory not found"})
+
       inventory ->
         render(conn, "show.json", inventory: inventory)
     end
@@ -232,10 +192,12 @@ defmodule InventoryApiWeb.InventoriesController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Inventory not found"})
+
       inventory ->
         case Inventories.update_inventory(inventory, inventory_params) do
           {:ok, updated_inventory} ->
             render(conn, "show.json", inventory: updated_inventory)
+
           {:error, changeset} ->
             conn
             |> put_status(:unprocessable_entity)
@@ -250,10 +212,12 @@ defmodule InventoryApiWeb.InventoriesController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Inventory not found"})
+
       inventory ->
         case Inventories.delete_inventory(inventory) do
           {:ok, _deleted_inventory} ->
             send_resp(conn, :no_content, "")
+
           {:error, reason} ->
             conn
             |> put_status(:unprocessable_entity)

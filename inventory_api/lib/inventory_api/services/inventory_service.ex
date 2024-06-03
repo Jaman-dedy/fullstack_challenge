@@ -118,15 +118,17 @@ defmodule InventoryApi.Services.InventoryService do
         {:reply, {:error, :invalid_quantity}, state}
 
       true ->
-        restock_params
-        |> Enum.each(fn item ->
+        inventories = restock_params
+        |> Enum.map(fn item ->
           case item do
             %{"product_id" => product_id, "quantity" => quantity} ->
               case Inventories.get_inventory_by_product_id(product_id) do
                 nil ->
-                  Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
+                  {:ok, inventory} = Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
+                  inventory
                 inventory ->
-                  Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+                  {:ok, updated_inventory} = Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+                  updated_inventory
               end
             %{"product_id" => _product_id} ->
               {:reply, {:error, :missing_quantity}, state}
@@ -134,10 +136,11 @@ defmodule InventoryApi.Services.InventoryService do
               nil
           end
         end)
+        |> Enum.reject(&is_nil/1)
 
         # TODO: Ship pending orders for the restocked products
 
-        {:reply, :ok, state}
+        {:reply, {:ok, inventories}, state}
     end
   end
 

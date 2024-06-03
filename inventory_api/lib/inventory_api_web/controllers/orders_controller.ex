@@ -3,46 +3,62 @@ defmodule InventoryApiWeb.OrdersController do
 
   alias InventoryApi.Order.Orders
   alias InventoryApi.Services.OrderService
+  alias InventoryApi.Services.InventoryService
 
-  action_fallback InventoryApiWeb.FallbackController
+  action_fallback(InventoryApiWeb.FallbackController)
 
   def process_order(conn, %{"requested" => requested} = params) do
-    case Map.fetch(params, "order_id") do
-      {:ok, order_id} ->
-        order_params = %{"order_id" => order_id, "requested" => requested}
-        case validate_order_params(order_params) do
-          {:ok, order_params} ->
-            case OrderService.process_order(order_params) do
-              {:ok, message} ->
+    case InventoryService.is_catalog_initialized?() do
+      true ->
+        case Map.fetch(params, "order_id") do
+          {:ok, order_id} ->
+            order_params = %{"order_id" => order_id, "requested" => requested}
+
+            case validate_order_params(order_params) do
+              {:ok, order_params} ->
+                case OrderService.process_order(order_params) do
+                  {:ok, order_items, message} ->
+                    conn
+                    |> put_status(:ok)
+                    |> json(%{status: "success", message: message, order_items: order_items})
+
+                  {:error, :invalid_order} ->
+                    conn
+                    |> put_status(:unprocessable_entity)
+                    |> json(%{error: "Invalid order"})
+
+                  {:error, :insufficient_inventory} ->
+                    conn
+                    |> put_status(:unprocessable_entity)
+                    |> json(%{error: "Insufficient inventory or invalid format"})
+                end
+
+              {:error, "Invalid product_id or quantity in requested items"} ->
                 conn
-                |> put_status(:ok)
-                |> json(%{message: message})
-              {:error, :invalid_order} ->
+                |> put_status(:bad_request)
+                |> json(%{error: "Invalid product_id or quantity in requested items"})
+
+              {:error, :empty_requested_items} ->
                 conn
-                |> put_status(:unprocessable_entity)
-                |> json(%{error: "Invalid order"})
-              {:error, :insufficient_inventory} ->
+                |> put_status(:bad_request)
+                |> json(%{error: "Empty requested items"})
+
+              {:error, reason} ->
                 conn
-                |> put_status(:unprocessable_entity)
-                |> json(%{error: "Insufficient inventory"})
+                |> put_status(:bad_request)
+                |> json(%{error: reason})
             end
-          {:error, "Invalid product_id or quantity in requested items"} ->
+
+          :error ->
             conn
             |> put_status(:bad_request)
-            |> json(%{error: "Invalid product_id or quantity in requested items"})
-          {:error, :empty_requested_items} ->
-            conn
-            |> put_status(:bad_request)
-            |> json(%{error: "Empty requested items"})
-          {:error, reason} ->
-            conn
-            |> put_status(:bad_request)
-            |> json(%{error: reason})
+            |> json(%{error: "Missing order_id parameter"})
         end
-      :error ->
+
+      false ->
         conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Missing order_id parameter"})
+        |> put_status(:unprocessable_entity)
+        |> json(%{message: "Catalog not initialized. Please call init_catalog first."})
     end
   end
 
@@ -60,11 +76,13 @@ defmodule InventoryApiWeb.OrdersController do
             |> put_status(:created)
             |> put_resp_header("location", ~p"/api/orders/#{order.id}")
             |> render("show.json", order: order)
+
           {:error, changeset} ->
             conn
             |> put_status(:unprocessable_entity)
             |> render("error.json", changeset: changeset)
         end
+
       {:error, reason} ->
         conn
         |> put_status(:bad_request)
@@ -76,6 +94,7 @@ defmodule InventoryApiWeb.OrdersController do
     case OrderService.get_order(id) do
       {:ok, order} ->
         render(conn, "show.json", order: order)
+
       {:error, :not_found} ->
         conn
         |> put_status(:not_found)
@@ -89,15 +108,18 @@ defmodule InventoryApiWeb.OrdersController do
         case OrderService.update_order(id, order_params) do
           {:ok, updated_order} ->
             render(conn, "show.json", order: updated_order)
+
           {:error, :not_found} ->
             conn
             |> put_status(:not_found)
             |> json(%{error: "Order not found"})
+
           {:error, changeset} ->
             conn
             |> put_status(:unprocessable_entity)
             |> render("error.json", changeset: changeset)
         end
+
       {:error, reason} ->
         conn
         |> put_status(:bad_request)
@@ -111,10 +133,12 @@ defmodule InventoryApiWeb.OrdersController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Order not found"})
+
       order ->
         case Orders.delete_order(order) do
           {:ok, _deleted_order} ->
             send_resp(conn, :no_content, "")
+
           {:error, reason} ->
             conn
             |> put_status(:unprocessable_entity)
@@ -127,14 +151,19 @@ defmodule InventoryApiWeb.OrdersController do
     cond do
       !Map.has_key?(order_params, "order_id") ->
         {:error, "Missing order_id parameter"}
+
       !Map.has_key?(order_params, "requested") ->
         {:error, "Missing requested parameter"}
+
       !is_list(order_params["requested"]) ->
         {:error, "Requested parameter must be a list"}
+
       order_params["requested"] == [] ->
         {:error, :empty_requested_items}
+
       !all_items_valid?(order_params["requested"]) ->
         {:error, "Invalid product_id or quantity in requested items"}
+
       true ->
         {:ok, order_params}
     end
@@ -164,10 +193,13 @@ defmodule InventoryApiWeb.OrdersController do
     cond do
       !Map.has_key?(order_params, "customer_id") ->
         {:error, "Missing customer_id parameter"}
+
       !Map.has_key?(order_params, "items") ->
         {:error, "Missing items parameter"}
+
       !is_list(order_params["items"]) ->
         {:error, "Items parameter must be a list"}
+
       true ->
         {:ok, order_params}
     end
@@ -177,6 +209,7 @@ defmodule InventoryApiWeb.OrdersController do
     cond do
       !Map.has_key?(order_params, "status") ->
         {:error, "Missing status parameter"}
+
       true ->
         {:ok, order_params}
     end
