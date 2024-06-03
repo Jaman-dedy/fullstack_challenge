@@ -1,11 +1,14 @@
 defmodule InventoryApi.Shipping.Shippings do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias InventoryApi.Repo
+  alias InventoryApi.Product.Products
 
   schema "shippings" do
-    field :shipped, {:array, :map}
     field :order_id, :integer
+    field :quantity, :integer
+    belongs_to :product, Products
 
     timestamps(type: :utc_datetime)
   end
@@ -13,26 +16,10 @@ defmodule InventoryApi.Shipping.Shippings do
   @doc false
   def changeset(shippings, attrs) do
     shippings
-    |> cast(attrs, [:shipped, :order_id])
-    |> validate_required([:shipped, :order_id])
-    |> validate_shipment()
-  end
-
-  defp validate_shipment(changeset) do
-    shipped_items = get_field(changeset, :shipped)
-    if is_list(shipped_items) and length(shipped_items) > 0 do
-      if Enum.all?(shipped_items, &is_valid_item?/1) do
-        changeset
-      else
-        add_error(changeset, :shipped, "Invalid shipped items")
-      end
-    else
-      add_error(changeset, :shipped, "Shipped items must be a non-empty list")
-    end
-  end
-
-  defp is_valid_item?(item) do
-    is_map(item) and Map.has_key?(item, "product_id") and Map.has_key?(item, "quantity")
+    |> cast(attrs, [:order_id, :quantity, :product_id])
+    |> validate_required([:order_id, :quantity, :product_id])
+    |> validate_number(:quantity, greater_than: 0)
+    |> foreign_key_constraint(:product_id)
   end
 
   def create_shipping(attrs \\ %{}) do
@@ -45,6 +32,10 @@ defmodule InventoryApi.Shipping.Shippings do
     Repo.get(__MODULE__, id)
   end
 
+  def get_shipping_records_by_order_id(order_id) do
+    Repo.all(from s in __MODULE__, where: s.order_id == ^order_id)
+  end
+
   def update_shipping(%__MODULE__{} = shipping, attrs) do
     shipping
     |> changeset(attrs)
@@ -53,9 +44,5 @@ defmodule InventoryApi.Shipping.Shippings do
 
   def delete_shipping(%__MODULE__{} = shipping) do
     Repo.delete(shipping)
-  end
-
-  def list_shippings() do
-    Repo.all(__MODULE__)
   end
 end

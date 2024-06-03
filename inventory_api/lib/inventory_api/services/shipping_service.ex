@@ -18,83 +18,49 @@ defmodule InventoryApi.Services.ShippingService do
     GenServer.call(__MODULE__, {:ship_package, shipment_params})
   end
 
-  def create_shipping(attrs \\ %{}) do
-    GenServer.call(__MODULE__, {:create_shipping, attrs})
-  end
-
-  def get_shipping(id) do
-    GenServer.call(__MODULE__, {:get_shipping, id})
-  end
-
-  def update_shipping(id, attrs) do
-    GenServer.call(__MODULE__, {:update_shipping, id, attrs})
-  end
-
   def handle_call({:ship_package, shipment_params}, _from, state) do
     case validate_shipment(shipment_params) do
       {:ok, shipment} ->
-        case Orders.get_order(shipment_params["order_id"]) do
-          nil ->
+        case Orders.get_order_items_by_order_id(shipment["order_id"]) do
+          [] ->
             {:reply, {:error, :order_not_found}, state}
-          _order ->
-            if valid_package_size?(shipment) do
-              # Create the shipping record
-              {:ok, shipping} = Shippings.create_shipping(shipment)
+          order_items ->
+            case valid_shipped_quantities?(shipment["shipped"], order_items) do
+              true ->
+                if valid_package_size?(shipment["shipped"]) do
+                  # Create shipping records for each shipped item
+                  Enum.each(shipment["shipped"], fn item ->
+                    product_id = item["product_id"]
+                    quantity = item["quantity"]
+                    attrs = %{
+                      order_id: shipment["order_id"],
+                      product_id: product_id,
+                      quantity: quantity
+                    }
+                    {:ok, _shipping} = Shippings.create_shipping(attrs)
 
-              # Update inventory
-              Enum.each(shipment["shipped"], fn item ->
-                product_id = item["product_id"]
-                quantity = item["quantity"]
-                Inventories.update_inventory_quantity(product_id, -quantity)
-              end)
+                    # Update inventory quantity
+                    Inventories.update_inventory_quantity(product_id, -quantity)
+                  end)
 
-              # Print the shipment details
-              IO.puts("Shipment created:")
-              IO.puts("Order ID: #{shipping.order_id}")
-              IO.puts("Shipped Items:")
-              Enum.each(shipping.shipped, fn item ->
-                IO.puts("- Product ID: #{item["product_id"]}, Quantity: #{item["quantity"]}")
-              end)
+                  # Print the shipment details
+                  IO.puts("Shipment created:")
+                  IO.puts("Order ID: #{shipment["order_id"]}")
+                  IO.puts("Shipped Items:")
+                  Enum.each(shipment["shipped"], fn item ->
+                    IO.puts("- Product ID: #{item["product_id"]}, Quantity: #{item["quantity"]}")
+                  end)
 
-              {:reply, :ok, state}
-            else
-              {:reply, {:error, :invalid_shipment}, state}
+                  {:reply, :ok, state}
+                else
+                  {:reply, {:error, :package_too_large}, state}
+                end
+              false ->
+                {:reply, {:error, :invalid_shipped_quantities}, state}
             end
         end
       {:error, reason} ->
         {:reply, {:error, reason}, state}
-    end
-  end
-
-  def handle_call({:create_shipping, attrs}, _from, state) do
-    case Shippings.create_shipping(attrs) do
-      {:ok, shipping} ->
-        {:reply, {:ok, shipping}, state}
-      {:error, changeset} ->
-        {:reply, {:error, changeset}, state}
-    end
-  end
-
-  def handle_call({:get_shipping, id}, _from, state) do
-    case Shippings.get_shipping(id) do
-      nil ->
-        {:reply, {:error, :not_found}, state}
-      shipping ->
-        {:reply, {:ok, shipping}, state}
-    end
-  end
-
-  def handle_call({:update_shipping, id, attrs}, _from, state) do
-    case Shippings.get_shipping(id) do
-      nil ->
-        {:reply, {:error, :not_found}, state}
-      shipping ->
-        case Shippings.update_shipping(shipping, attrs) do
-          {:ok, updated_shipping} ->
-            {:reply, {:ok, updated_shipping}, state}
-          {:error, changeset} ->
-            {:reply, {:error, changeset}, state}
-        end
     end
   end
 
@@ -104,10 +70,15 @@ defmodule InventoryApi.Services.ShippingService do
         case Map.has_key?(shipment_params, "shipped") do
           true ->
             shipped_items = shipment_params["shipped"]
-            case is_list(shipped_items) and length(shipped_items) > 0 do
+            case is_list(shipped_items) do
               true ->
                 valid_items? = Enum.all?(shipped_items, fn item ->
-                  is_map(item) and Map.has_key?(item, "product_id") and Map.has_key?(item, "quantity")
+                  is_map(item) and
+                  Map.has_key?(item, "product_id") and
+                  Map.has_key?(item, "quantity") and
+                  is_integer(item["product_id"]) and
+                  is_integer(item["quantity"]) and
+                  item["quantity"] > 0
                 end)
                 if valid_items? do
                   {:ok, shipment_params}
@@ -115,7 +86,7 @@ defmodule InventoryApi.Services.ShippingService do
                   {:error, :invalid_shipped_items}
                 end
               false ->
-                {:error, :empty_shipped_items}
+                {:error, :invalid_shipped_format}
             end
           false ->
             {:error, :missing_shipped_items}
@@ -125,10 +96,34 @@ defmodule InventoryApi.Services.ShippingService do
     end
   end
 
-  defp valid_package_size?(shipment) do
-    total_mass = Enum.reduce(shipment["shipped"], 0, fn item, acc ->
-      acc + item["quantity"] * Decimal.new(item["mass_kg"])
+  # defp is_valid_product_id?(product_id) do
+  #   is_integer(product_id)
+  # end
+
+  # defp is_valid_quantity?(quantity) do
+  #   case Integer.parse(quantity) do
+  #     {parsed_quantity, ""} when parsed_quantity > 0 -> true
+  #     _ -> false
+  #   end
+  # end
+
+  defp valid_shipped_quantities?(shipped_items, order_items) do
+    Enum.all?(shipped_items, fn item ->
+      product_id = item["product_id"]
+      quantity = item["quantity"]
+      Enum.any?(order_items, fn order_item ->
+        order_item.product_id == product_id and order_item.quantity >= quantity
+      end)
     end)
-    Decimal.compare(total_mass, Decimal.new(@max_package_size)) != :gt
+  end
+
+  defp valid_package_size?(shipped_items) do
+    total_mass = Enum.reduce(shipped_items, 0, fn item, acc ->
+      product_id = item["product_id"]
+      quantity = item["quantity"]
+      inventory = Inventories.get_inventory_by_product_id(product_id)
+      acc + quantity * inventory.quantity
+    end)
+    total_mass <= @max_package_size
   end
 end

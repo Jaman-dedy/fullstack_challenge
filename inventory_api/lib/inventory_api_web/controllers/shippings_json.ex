@@ -18,7 +18,9 @@ defmodule InventoryApiWeb.ShippingsJSON do
   defp data(%Shippings{} = shippings) do
     %{
       id: shippings.id,
-      shipped: shippings.shipped
+      order_id: shippings.order_id,
+      quantity: shippings.quantity,
+      product_id: shippings.product_id
     }
   end
 end

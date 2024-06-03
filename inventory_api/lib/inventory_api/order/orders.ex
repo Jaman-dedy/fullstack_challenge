@@ -45,6 +45,13 @@ defmodule InventoryApi.Order.Orders do
     )
   end
 
+  def get_order_items_by_order_id(order_id) do
+    Repo.all(
+      from order_item in __MODULE__,
+      where: order_item.order_id == ^order_id
+    )
+  end
+
   def update_order(%__MODULE__{} = order, attrs) do
     order
     |> changeset(attrs)

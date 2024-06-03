@@ -4,6 +4,7 @@ defmodule InventoryApi.Catalog.Products do
   alias InventoryApi.Repo
   alias InventoryApi.Inventory.Inventories
   alias InventoryApi.Order.Orders
+  alias InventoryApi.Shipping.Shippings
 
   schema "products" do
     field :product_name, :string
@@ -11,6 +12,7 @@ defmodule InventoryApi.Catalog.Products do
     field :product_id, :integer
     has_many :inventories, Inventories, foreign_key: :product_id
     has_many :orders, Orders, foreign_key: :product_id
+    has_many :shippings, Shippings, foreign_key: :product_id
     timestamps(type: :utc_datetime)
   end
 
