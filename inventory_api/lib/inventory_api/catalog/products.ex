@@ -6,6 +6,7 @@ defmodule InventoryApi.Catalog.Products do
   alias InventoryApi.Order.Orders
   alias InventoryApi.Shipping.Shippings
 
+  @derive {Jason.Encoder, only: [:id, :product_name, :mass_kg, :product_id]}
   schema "products" do
     field :product_name, :string
     field :mass_kg, :float
@@ -53,6 +54,15 @@ defmodule InventoryApi.Catalog.Products do
     product
     |> changeset(attrs)
     |> Repo.update()
+  end
+
+  def insert_or_update_product(product_params) do
+    case get_product(product_params["product_id"]) do
+      nil ->
+        create_product(product_params)
+      existing_product ->
+        update_product(existing_product, product_params)
+    end
   end
 
   def delete_product(%__MODULE__{} = product) do

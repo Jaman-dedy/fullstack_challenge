@@ -67,10 +67,20 @@ defmodule InventoryApi.Services.InventoryService do
         {:reply, {:error, :invalid_product_id}, state}
 
       true ->
-        Enum.each(product_info, fn product ->
-          Products.create_product(product)
+        {catalog, errors} = Enum.reduce(product_info, {[], []}, fn product, {catalog, errors} ->
+          case Products.insert_or_update_product(product) do
+            {:ok, created_product} ->
+              {[created_product | catalog], errors}
+            {:error, changeset} ->
+              {catalog, [changeset | errors]}
+          end
         end)
-        {:reply, {:ok, :catalog_initialized}, %{state | catalog_initialized: true}}
+
+        if Enum.empty?(errors) do
+          {:reply, {:ok, Enum.reverse(catalog)}, %{state | catalog_initialized: true}}
+        else
+          {:reply, {:error, errors}, state}
+        end
     end
   end
 
@@ -87,24 +97,41 @@ defmodule InventoryApi.Services.InventoryService do
       not is_list(restock_params) or Enum.empty?(restock_params) ->
         {:reply, {:error, :empty_restock_payload}, state}
 
-      Enum.any?(restock_params, fn %{"product_id" => product_id} ->
-        not is_integer(product_id) or product_id < 0 or is_nil(Products.get_product(product_id))
+      Enum.any?(restock_params, fn item ->
+        case item do
+          %{"product_id" => product_id} ->
+            not is_integer(product_id) or product_id < 0 or is_nil(Products.get_product(product_id))
+          _ ->
+            true
+        end
       end) ->
         {:reply, {:error, :invalid_product_id}, state}
 
-      Enum.any?(restock_params, fn %{"quantity" => quantity} ->
-        not is_integer(quantity) or quantity < 0
+      Enum.any?(restock_params, fn item ->
+        case item do
+          %{"quantity" => quantity} ->
+            not is_integer(quantity) or quantity < 0
+          _ ->
+            true
+        end
       end) ->
         {:reply, {:error, :invalid_quantity}, state}
 
       true ->
         restock_params
-        |> Enum.each(fn %{"product_id" => product_id, "quantity" => quantity} ->
-          case Inventories.get_inventory_by_product_id(product_id) do
-            nil ->
-              Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
-            inventory ->
-              Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+        |> Enum.each(fn item ->
+          case item do
+            %{"product_id" => product_id, "quantity" => quantity} ->
+              case Inventories.get_inventory_by_product_id(product_id) do
+                nil ->
+                  Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
+                inventory ->
+                  Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+              end
+            %{"product_id" => _product_id} ->
+              {:reply, {:error, :missing_quantity}, state}
+            _ ->
+              nil
           end
         end)
 

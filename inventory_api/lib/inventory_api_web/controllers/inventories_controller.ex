@@ -1,4 +1,5 @@
 defmodule InventoryApiWeb.InventoriesController do
+  import Ecto.Changeset
   use InventoryApiWeb, :controller
 
   alias InventoryApi.Inventory.Inventories
@@ -6,43 +7,152 @@ defmodule InventoryApiWeb.InventoriesController do
 
   action_fallback InventoryApiWeb.FallbackController
 
+  # def init_catalog(conn, %{"product_info" => product_info}) do
+  #   case InventoryService.init_catalog(product_info) do
+  #     {:ok, catalog} ->
+  #       conn
+  #       |> put_status(:ok)
+  #       |> json(%{
+  #         status: "success",
+  #         message: "Product catalog initialized successfully",
+  #         catalog: catalog
+  #       })
+
+  #     {:error, :catalog_already_initialized} ->
+  #       conn
+  #       |> put_status(:bad_request)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Product catalog has already been initialized"
+  #       })
+
+  #     {:error, :empty_catalog} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Empty product catalog"
+  #       })
+
+  #     {:error, :duplicate_product_id} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Duplicate product_id found"
+  #       })
+
+  #     {:error, :invalid_mass_kg} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Invalid mass_kg value"
+  #       })
+
+  #     {:error, :invalid_product_name} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Missing or invalid product_name"
+  #       })
+
+  #     {:error, :invalid_product_id} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Missing or invalid product_id"
+  #       })
+  #   end
+  # end
+
   def init_catalog(conn, %{"product_info" => product_info}) do
     case InventoryService.init_catalog(product_info) do
-      {:ok, :catalog_initialized} ->
+      {:ok, catalog} ->
+        catalog_map = Enum.map(catalog, fn product ->
+          %{
+            id: product.id,
+            product_name: product.product_name,
+            mass_kg: product.mass_kg,
+            product_id: product.product_id
+          }
+        end)
+
         conn
         |> put_status(:ok)
-        |> json(%{message: "Product catalog initialized successfully"})
+        |> json(%{
+          status: "success",
+          message: "Product catalog initialized successfully",
+          catalog: catalog
+        })
+
+      {:error, errors} when is_list(errors) ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{
+          status: "error",
+          message: "Failed to initialize product catalog",
+          errors: Enum.map(errors, &changeset_errors/1)
+        })
 
       {:error, :catalog_already_initialized} ->
         conn
         |> put_status(:bad_request)
-        |> json(%{message: "Product catalog has already been initialized"})
+        |> json(%{
+          status: "error",
+          message: "Product catalog has already been initialized"
+        })
 
       {:error, :empty_catalog} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "Empty product catalog"})
+        |> json(%{
+          status: "error",
+          message: "Empty product catalog"
+        })
 
       {:error, :duplicate_product_id} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "Duplicate product_id found"})
+        |> json(%{
+          status: "error",
+          message: "Duplicate product_id found"
+        })
 
       {:error, :invalid_mass_kg} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "Invalid mass_kg value"})
+        |> json(%{
+          status: "error",
+          message: "Invalid mass_kg value"
+        })
 
       {:error, :invalid_product_name} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "Missing or invalid product_name"})
+        |> json(%{
+          status: "error",
+          message: "Missing or invalid product_name"
+        })
 
       {:error, :invalid_product_id} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{message: "Missing or invalid product_id"})
+        |> json(%{
+          status: "error",
+          message: "Missing or invalid product_id"
+        })
     end
+  end
+
+  defp changeset_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
   end
 
   def re_init_catalog(conn, _params) do
@@ -50,7 +160,7 @@ defmodule InventoryApiWeb.InventoriesController do
       {:ok, :catalog_reinitialized} ->
         conn
         |> put_status(:ok)
-        |> json(%{message: "Product catalog reinitialized successfully"})
+        |> json(%{message: "Product catalog was successfully reset"})
     end
   end
 
@@ -69,11 +179,15 @@ defmodule InventoryApiWeb.InventoriesController do
           {:error, :invalid_product_id} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Invalid product_id"})
+            |> json(%{message: "Invalid or missing product_id"})
           {:error, :invalid_quantity} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{message: "Invalid quantity value"})
+            |> json(%{message: "Invalid or missing quantity value"})
+          {:error, :missing_quantity} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{message: "Missing quantity value"})
         end
       false ->
         conn
