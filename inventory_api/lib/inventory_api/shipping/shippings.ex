@@ -5,9 +5,11 @@ defmodule InventoryApi.Shipping.Shippings do
   alias InventoryApi.Repo
   alias InventoryApi.Product.Products
 
+  @derive {Jason.Encoder, only: [:id, :order_id, :quantity, :product_id, :status, :inserted_at, :updated_at]}
   schema "shippings" do
     field :order_id, :integer
     field :quantity, :integer
+    field :status, :string, default: "in_progress"
     belongs_to :product, Products
 
     timestamps(type: :utc_datetime)
@@ -16,7 +18,7 @@ defmodule InventoryApi.Shipping.Shippings do
   @doc false
   def changeset(shippings, attrs) do
     shippings
-    |> cast(attrs, [:order_id, :quantity, :product_id])
+    |> cast(attrs, [:order_id, :quantity, :product_id, :status])
     |> validate_required([:order_id, :quantity, :product_id])
     |> validate_number(:quantity, greater_than: 0)
     |> foreign_key_constraint(:product_id)

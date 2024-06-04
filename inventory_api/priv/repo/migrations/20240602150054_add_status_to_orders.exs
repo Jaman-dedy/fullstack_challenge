@@ -3,7 +3,7 @@ defmodule InventoryApi.Repo.Migrations.AddStatusToOrders do
 
   def change do
     alter table(:orders) do
-      add :status, :string, default: "pending"
+      add :status, :string, default: "init"
     end
   end
 end

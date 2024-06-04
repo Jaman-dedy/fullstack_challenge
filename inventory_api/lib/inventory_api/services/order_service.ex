@@ -122,7 +122,7 @@ defmodule InventoryApi.Services.OrderService do
         case Orders.get_order_item_by_order_and_product(order_id, product_id) do
           nil ->
             # Create a new order item
-            attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "pending"}
+            attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "init"}
             {:ok, _order_item} = Orders.create_order_item(attrs)
           order_item ->
             # Update the quantity of the existing order item

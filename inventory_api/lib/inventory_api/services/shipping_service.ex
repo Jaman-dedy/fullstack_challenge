@@ -2,7 +2,6 @@ defmodule InventoryApi.Services.ShippingService do
   use GenServer
   alias InventoryApi.Shipping.Shippings
   alias InventoryApi.Order.Orders
-  alias InventoryApi.Inventory.Inventories
 
   @max_package_size 134.8
 
@@ -28,33 +27,31 @@ defmodule InventoryApi.Services.ShippingService do
             case valid_shipped_quantities?(shipment["shipped"], order_items) do
               true ->
                 if valid_package_size?(shipment["shipped"]) do
-                  # Check if all products exist before creating shipping records
                   case all_products_exist?(shipment["shipped"]) do
                     true ->
-                      # Create shipping records for each shipped item
-                      Enum.each(shipment["shipped"], fn item ->
-                        product_id = item["product_id"]
-                        quantity = item["quantity"]
-                        attrs = %{
-                          order_id: shipment["order_id"],
-                          product_id: product_id,
-                          quantity: quantity
-                        }
-                        {:ok, _shipping} = Shippings.create_shipping(attrs)
+                      total_order_quantity = Enum.reduce(order_items, 0, &(&1.quantity + &2))
+                      total_shipped_quantity = Enum.reduce(shipment["shipped"], 0, &(&1["quantity"] + &2))
 
-                        # Update order item quantity
-                        Orders.update_order_item_quantity(shipment["order_id"], product_id, -quantity)
-                      end)
+                      order_status = if total_shipped_quantity < total_order_quantity, do: "processing", else: "completed"
 
-                      # Print the shipment details
-                      IO.puts("Shipment created:")
-                      IO.puts("Order ID: #{shipment["order_id"]}")
-                      IO.puts("Shipped Items:")
-                      Enum.each(shipment["shipped"], fn item ->
-                        IO.puts("- Product ID: #{item["product_id"]}, Quantity: #{item["quantity"]}")
-                      end)
+                      shipped_package_itinerary =
+                        Enum.map(shipment["shipped"], fn item ->
+                          product_id = item["product_id"]
+                          quantity = item["quantity"]
+                          attrs = %{
+                            order_id: shipment["order_id"],
+                            product_id: product_id,
+                            quantity: quantity,
+                            status: order_status
+                          }
+                          {:ok, shipping} = Shippings.create_shipping(attrs)
+                          Orders.update_order_item_quantity(shipment["order_id"], product_id, -quantity)
+                          %{product_id: product_id, quantity: quantity, status: shipping.status, updated_at: shipping.updated_at}
+                        end)
 
-                      {:reply, :ok, state}
+                      Orders.update_order_items_status(shipment["order_id"], order_status)
+
+                      {:reply, {:ok, order_status, "Package shipped successfully", shipped_package_itinerary}, state}
                     false ->
                       {:reply, {:error, :product_not_found}, state}
                   end
@@ -133,20 +130,11 @@ defmodule InventoryApi.Services.ShippingService do
   end
 
   defp valid_package_size?(shipped_items) do
-    result = Enum.reduce_while(shipped_items, 0, fn item, acc ->
-      product_id = item["product_id"]
+    total_quantity = Enum.reduce(shipped_items, 0, fn item, acc ->
       quantity = item["quantity"]
-      inventory = Inventories.get_inventory_by_product_id(product_id)
-      if inventory do
-        {:cont, acc + quantity * inventory.quantity}
-      else
-        {:halt, {:error, "Inventory not found for product ID #{product_id}"}}
-      end
+      acc + quantity
     end)
 
-    case result do
-      {:error, reason} -> {:error, reason}
-      total_mass -> total_mass <= @max_package_size
-    end
+    total_quantity <= @max_package_size
   end
 end

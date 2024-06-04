@@ -9,7 +9,7 @@ defmodule InventoryApi.Order.Orders do
   schema "orders" do
     field :order_id, :integer
     field :quantity, :integer
-    field :status, :string, default: "pending"
+    field :status, :string, default: "init"
     belongs_to :product, Products
     timestamps(type: :utc_datetime)
   end
@@ -53,8 +53,16 @@ defmodule InventoryApi.Order.Orders do
     )
   end
 
+  defp get_order_by_order_id(order_id) do
+    Repo.one(
+      from order in __MODULE__,
+      where: order.order_id == ^order_id,
+      limit: 1
+    )
+  end
+
   defp get_order_item_by_order_id_and_product_id(order_id, product_id) do
-    Repo.get_by(OrderItem, order_id: order_id, product_id: product_id)
+    Repo.get_by(__MODULE__, order_id: order_id, product_id: product_id)
   end
 
   def update_order_item_quantity(order_id, product_id, quantity_change) do
@@ -78,6 +86,19 @@ defmodule InventoryApi.Order.Orders do
     order
     |> changeset(attrs)
     |> Repo.update()
+  end
+
+  def update_order_items_status(order_id, status) do
+    order_items = get_order_items_by_order_id(order_id)
+
+    if Enum.any?(order_items) do
+      order_items
+      |> Enum.map(fn order_item ->
+        update_order_item(order_item, %{status: status})
+      end)
+    else
+      {:error, "No order items found for order ID #{order_id}"}
+    end
   end
 
   def update_order_item(%__MODULE__{} = order_item, attrs) do

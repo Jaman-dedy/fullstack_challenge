@@ -1,5 +1,4 @@
 defmodule InventoryApiWeb.InventoriesController do
-  import Ecto.Changeset
   use InventoryApiWeb, :controller
 
   alias InventoryApi.Inventory.Inventories
