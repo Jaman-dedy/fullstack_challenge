@@ -30,12 +30,19 @@ defmodule InventoryApi.Services.OrderService do
   def handle_call({:process_order, order_params}, _from, state) do
     case validate_order(order_params) do
       {:ok, order} ->
+        order_id = order["order_id"]
         requested_items = order["requested"]
-        case create_order_items(order["order_id"], requested_items) do
-          {:ok, order_items} ->
-            {:reply, {:ok, order_items, "Order created successfully"}, state}
-          {:error, :insufficient_inventory} ->
-            {:reply, {:error, :insufficient_inventory}, state}
+
+        case order_completed?(order_id) do
+          true ->
+            {:reply, {:error, :order_completed}, state}
+          false ->
+            case create_order_items(order_id, requested_items) do
+              {:ok, order_items} ->
+                {:reply, {:ok, order_items, "Order created successfully"}, state}
+              {:error, :insufficient_inventory} ->
+                {:reply, {:error, :insufficient_inventory}, state}
+            end
         end
       {:error, reason} ->
         {:reply, {:error, reason}, state}
@@ -98,6 +105,17 @@ defmodule InventoryApi.Services.OrderService do
         end
       false ->
         {:error, :missing_order_id}
+    end
+  end
+
+  defp order_completed?(order_id) do
+    case Orders.get_order_items_by_order_id(order_id) do
+      [] ->
+        false
+      order_items ->
+        Enum.all?(order_items, fn item ->
+          item.status == "completed" && item.quantity == 0
+        end)
     end
   end
 

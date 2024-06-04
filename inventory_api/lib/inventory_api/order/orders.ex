@@ -53,14 +53,6 @@ defmodule InventoryApi.Order.Orders do
     )
   end
 
-  defp get_order_by_order_id(order_id) do
-    Repo.one(
-      from order in __MODULE__,
-      where: order.order_id == ^order_id,
-      limit: 1
-    )
-  end
-
   defp get_order_item_by_order_id_and_product_id(order_id, product_id) do
     Repo.get_by(__MODULE__, order_id: order_id, product_id: product_id)
   end

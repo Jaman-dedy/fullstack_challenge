@@ -22,6 +22,11 @@ defmodule InventoryApiWeb.OrdersController do
                     |> put_status(:ok)
                     |> json(%{status: "success", message: message, order_items: order_items})
 
+                  {:error, :order_completed} ->
+                    conn
+                    |> put_status(:unprocessable_entity)
+                    |> json(%{error: "Order already completed. Please initiate a new order."})
+
                   {:error, :invalid_order} ->
                     conn
                     |> put_status(:unprocessable_entity)
