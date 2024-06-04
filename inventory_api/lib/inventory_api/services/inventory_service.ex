@@ -39,6 +39,10 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.call(__MODULE__, {:update_inventory, id, attrs})
   end
 
+  def get_catalog() do
+    GenServer.call(__MODULE__, :get_catalog)
+  end
+
 
   # Callback functions
 
@@ -141,6 +145,15 @@ defmodule InventoryApi.Services.InventoryService do
         # TODO: Ship pending orders for the restocked products
 
         {:reply, {:ok, inventories}, state}
+    end
+  end
+
+  def handle_call(:get_catalog, _from, state) do
+    if state.catalog_initialized do
+      catalog = Products.list_products()
+      {:reply, {:ok, catalog}, state}
+    else
+      {:reply, {:error, :catalog_not_initialized}, state}
     end
   end
 

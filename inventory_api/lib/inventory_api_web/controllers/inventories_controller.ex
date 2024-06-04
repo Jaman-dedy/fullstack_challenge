@@ -7,6 +7,19 @@ defmodule InventoryApiWeb.InventoriesController do
   action_fallback(InventoryApiWeb.FallbackController)
 
   def init_catalog(conn, %{"product_info" => product_info}) do
+    handle_init_catalog(conn, product_info)
+  end
+
+  def init_catalog(conn, _params) do
+    conn
+    |> put_status(:bad_request)
+    |> json(%{
+      status: "error",
+      message: "Missing product_info parameter"
+    })
+  end
+
+  defp handle_init_catalog(conn, product_info) do
     case InventoryService.init_catalog(product_info) do
       {:ok, catalog} ->
         catalog_map =
@@ -85,6 +98,116 @@ defmodule InventoryApiWeb.InventoriesController do
         })
     end
   end
+
+  def get_catalog(conn, _params) do
+    case InventoryService.get_catalog() do
+      {:ok, catalog} ->
+        catalog_map =
+          Enum.map(catalog, fn product ->
+            %{
+              id: product.id,
+              product_name: product.product_name,
+              mass_kg: product.mass_kg,
+              product_id: product.product_id
+            }
+          end)
+
+        conn
+        |> put_status(:ok)
+        |> json(%{
+          status: "success",
+          catalog: catalog_map
+        })
+
+      {:error, :catalog_not_initialized} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{
+          status: "error",
+          message: "Product catalog has not been initialized"
+        })
+    end
+  end
+
+  # def init_catalog(conn, %{"product_info" => product_info}) do
+  #   case InventoryService.init_catalog(product_info) do
+  #     {:ok, catalog} ->
+  #       catalog_map =
+  #         Enum.map(catalog, fn product ->
+  #           %{
+  #             id: product.id,
+  #             product_name: product.product_name,
+  #             mass_kg: product.mass_kg,
+  #             product_id: product.product_id
+  #           }
+  #         end)
+
+  #       conn
+  #       |> put_status(:ok)
+  #       |> json(%{
+  #         status: "success",
+  #         message: "Product catalog initialized successfully",
+  #         catalog: catalog_map
+  #       })
+
+  #     {:error, errors} when is_list(errors) ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Failed to initialize product catalog",
+  #         errors: Enum.map(errors, &changeset_errors/1)
+  #       })
+
+  #     {:error, :catalog_already_initialized} ->
+  #       conn
+  #       |> put_status(:bad_request)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Product catalog has already been initialized"
+  #       })
+
+  #     {:error, :empty_catalog} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Empty product catalog"
+  #       })
+
+  #     {:error, :duplicate_product_id} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Duplicate product_id found"
+  #       })
+
+  #     {:error, :invalid_mass_kg} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Invalid mass_kg value"
+  #       })
+
+  #     {:error, :invalid_product_name} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Missing or invalid product_name"
+  #       })
+
+  #     {:error, :invalid_product_id} ->
+  #       conn
+  #       |> put_status(:unprocessable_entity)
+  #       |> json(%{
+  #         status: "error",
+  #         message: "Missing or invalid product_id"
+  #       })
+  #   end
+  # end
 
   defp changeset_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
