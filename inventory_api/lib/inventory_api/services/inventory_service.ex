@@ -114,7 +114,7 @@ defmodule InventoryApi.Services.InventoryService do
       Enum.any?(restock_params, fn item ->
         case item do
           %{"quantity" => quantity} ->
-            not is_integer(quantity) or quantity < 0
+            not is_integer(quantity)
           _ ->
             true
         end
@@ -122,29 +122,36 @@ defmodule InventoryApi.Services.InventoryService do
         {:reply, {:error, :invalid_quantity}, state}
 
       true ->
-        inventories = restock_params
-        |> Enum.map(fn item ->
-          case item do
-            %{"product_id" => product_id, "quantity" => quantity} ->
-              case Inventories.get_inventory_by_product_id(product_id) do
-                nil ->
-                  {:ok, inventory} = Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
-                  inventory
-                inventory ->
-                  {:ok, updated_inventory} = Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
-                  updated_inventory
-              end
-            %{"product_id" => _product_id} ->
-              {:reply, {:error, :missing_quantity}, state}
-            _ ->
-              nil
-          end
-        end)
-        |> Enum.reject(&is_nil/1)
+        inventories =
+          restock_params
+          |> Enum.map(fn item ->
+            case item do
+              %{"product_id" => product_id, "quantity" => quantity} ->
+                if quantity == 0 do
+                  nil
+                else
+                  case Inventories.get_inventory_by_product_id(product_id) do
+                    nil ->
+                      {:ok, inventory} = Inventories.create_inventory(%{product_id: product_id, quantity: quantity})
+                      inventory
+                    inventory ->
+                      {:ok, updated_inventory} = Inventories.update_inventory(inventory, %{quantity: inventory.quantity + quantity})
+                      updated_inventory
+                  end
+                end
+              %{"product_id" => _product_id} ->
+                {:reply, {:error, :missing_quantity}, state}
+              _ ->
+                nil
+            end
+          end)
+          |> Enum.reject(&is_nil/1)
 
-        # TODO: Ship pending orders for the restocked products
-
-        {:reply, {:ok, inventories}, state}
+        if Enum.any?(restock_params, fn item -> item["quantity"] == 0 end) do
+          {:reply, {:error, :zero_quantity}, state}
+        else
+          {:reply, {:ok, inventories}, state}
+        end
     end
   end
 
