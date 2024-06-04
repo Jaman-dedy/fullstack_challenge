@@ -59,6 +59,12 @@ defmodule InventoryApi.Inventory.Inventories do
     Repo.all(__MODULE__)
   end
 
+  def list_inventories_with_products() do
+    __MODULE__
+    |> Repo.all()
+    |> Repo.preload(:product)
+  end
+
   def update_product_quantity(product_id, quantity) do
     from(i in __MODULE__,
       where: i.product_id == ^product_id,

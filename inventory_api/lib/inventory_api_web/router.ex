@@ -33,6 +33,7 @@ defmodule InventoryApiWeb.Router do
     get "/catalog", InventoriesController, :get_catalog
     post "/reset_catalog", InventoriesController, :re_init_catalog
     post "/process_restock", InventoriesController, :process_restock
+    get "/get_inventories", InventoriesController, :get_inventories
     post "/process_order", OrdersController, :process_order
     post "/ship_package", ShippingsController, :ship_package
   end
