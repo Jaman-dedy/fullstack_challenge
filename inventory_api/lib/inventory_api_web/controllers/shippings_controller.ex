@@ -104,4 +104,19 @@ defmodule InventoryApiWeb.ShippingsController do
         render(conn, "show.json", shipping: shipping)
     end
   end
+
+  def get_shipped_packages_by_order_id(conn, %{"order_id" => order_id}) do
+    case ShippingService.get_shipped_packages_by_order_id(order_id) do
+      {:ok, shipped_packages} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{status: "success", shipped_packages: shipped_packages})
+
+      {:error, :shipped_packages_not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{status: "error", message: "Shipped packages not found for the given order ID"})
+    end
+  end
+
 end
