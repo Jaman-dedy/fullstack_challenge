@@ -12,15 +12,16 @@ import {
 import {
   Bars3Icon,
   BellIcon,
-  CalendarIcon,
-  ChartPieIcon,
-  DocumentDuplicateIcon,
   FolderIcon,
   HomeIcon,
   UsersIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import Trucks from '@/components/Trucks'
+import './style.css'
+
+import Stats from '@/components/Stats'
 
 const navigation = [
   { name: 'Home', href: '#', icon: HomeIcon, current: true },
@@ -41,14 +42,6 @@ export default function Example() {
 
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-white">
-        <body class="h-full">
-        ```
-      */}
       <div>
         <Transition show={sidebarOpen}>
           <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
@@ -235,17 +228,20 @@ export default function Example() {
               </div>
             </div>
           </div>
-
-        <div className="mx-auto w-full max-w-7xl grow lg:flex xl:px-2 h-screen">
-          <div className="flex-1 xl:flex">
-
-            <div className="my-5 mx-2 lg:mx-0 lg:my-10 lg:mr-10 rounded-xl text-black border-dashed border-2 border-gray-200 px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6"> Main </div>
+          <div className='lg:mx-14 mx-2'>
+            <Stats />
           </div>
+          <div className="mx-auto w-full gap-4 max-w-7xl grow lg:flex xl:px-4 h-full">
+            <div className="flex-1 xl:flex">
+              <div className="hide-scrollbar overflow-y-auto my-5 mx-2 lg:mx-0 lg:my-6 rounded-xl text-black border-dashed border-2 border-gray-200 px-4 lg:pl-6 py-6 lg:pl-8 xl:flex-1 xl:pl-6  sm:px-6">
+                <Trucks />
+              </div>
+            </div>
 
-          <div className="lg:my-10 mx-2 lg:mx-0 rounded-xl text-black shrink-0 border-dashed border-2 border-gray-200 px-4 py-6 sm:px-6 lg:w-96 lg:border-dashed lg:border-dashed lg:pr-8 xl:pr-6">
-            Right side here
+            <div className="lg:my-6 mx-2 lg:mx-0 rounded-xl text-black shrink-0 border-dashed border-2 border-gray-200 px-4 py-6 sm:px-6 lg:w-[32.2%] lg:border-dashed lg:border-dashed lg:pr-8 xl:pr-6">
+              Right side here
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </>
