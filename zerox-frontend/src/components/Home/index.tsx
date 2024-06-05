@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import Trucks from '@/components/Trucks'
+import Docks from '@/components/Docks'
 import './style.css'
 
 import Stats from '@/components/Stats'
@@ -239,7 +240,7 @@ export default function Example() {
             </div>
 
             <div className="lg:my-6 mx-2 lg:mx-0 rounded-xl text-black shrink-0 border-dashed border-2 border-gray-200 px-4 py-6 sm:px-6 lg:w-[32.2%] lg:border-dashed lg:border-dashed lg:pr-8 xl:pr-6">
-              Right side here
+              <Docks/>
             </div>
           </div>
         </div>
