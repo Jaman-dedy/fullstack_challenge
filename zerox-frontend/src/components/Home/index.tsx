@@ -12,10 +12,10 @@ import {
 import {
   Bars3Icon,
   BellIcon,
-  FolderIcon,
+  BoltIcon,
   HomeIcon,
-  UsersIcon,
   XMarkIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import Trucks from '@/components/Trucks'
@@ -26,8 +26,8 @@ import Stats from '@/components/Stats'
 
 const navigation = [
   { name: 'Home', href: '#', icon: HomeIcon, current: true },
-  { name: 'Trucks', href: '#', icon: UsersIcon, current: false },
-  { name: 'Docks', href: '#', icon: FolderIcon, current: false },
+  { name: 'Trucks', href: '#', icon: TruckIcon, current: false },
+  { name: 'Docks', href: '#', icon: BoltIcon, current: false },
 ]
 const userNavigation = [
   { name: 'Your profile', href: '#' },

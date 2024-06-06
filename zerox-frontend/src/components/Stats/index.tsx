@@ -5,6 +5,7 @@ const stats = [
   { id: 1, name: 'Trucks uncharged', stat: '30', icon: UsersIcon, subIcon: Battery0Icon, change: '0%', changeType: 'decrease' },
   { id: 2, name: 'Trucks full-charged', stat: '18', icon: EnvelopeOpenIcon, subIcon: Battery100Icon, change: '100%', changeType: 'increase' },
   { id: 3, name: 'Available dock slot', stat: '0', icon: CursorArrowRaysIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
+  { id: 4, name: 'Trucks on charge', stat: '0', icon: CursorArrowRaysIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
 ]
 
 function classNames(...classes) {
@@ -14,7 +15,7 @@ function classNames(...classes) {
 export default function Example() {
   return (
     <div>
-      <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((item) => (
           <div
             key={item.id}
