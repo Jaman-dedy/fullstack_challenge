@@ -1,208 +1,91 @@
-// import {
-//     TruckIcon,
-//     Battery0Icon, Battery100Icon,
-//     Battery50Icon
-// } from '@heroicons/react/24/outline'
-// import './blink.css'
+import { TruckIcon, Battery100Icon, Battery50Icon, Battery0Icon } from '@heroicons/react/24/outline'
+import React from 'react'
+import Layout from '@/components/Layout'
+import Table from '@/components/common/Table'
 
 
-// function classNames(...classes) {
-//     return classes.filter(Boolean).join(' ')
-// }
-
-// export default function Example() {
-//     return (
-//         <div>
-//             <h2 className="text-base font-semibold leading-6 text-gray-900">Autonomous Trucks</h2>
-//             <p className="mt-1 text-sm text-gray-500">
-//                 Please check the battery status of the trucks here
-//             </p>
-//             <ul role="list" className="mt-6 grid grid-cols-1 gap-6 border-b border-t border-gray-200 py-6 sm:grid-cols-3">
-//                 {items.map((item, itemIdx) => (
-//                     <li key={itemIdx} className="flow-root">
-//                         <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-indigo-500 hover:bg-gray-50">
-//                             <div
-//                                 className={classNames(
-//                                     item.background,
-//                                     'flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg'
-//                                 )}
-//                             >
-//                                 <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
-//                             </div>
-//                             <div>
-//                                 <h3 className="text-sm font-medium text-gray-900">
-//                                     <a href="#" className="focus:outline-none">
-//                                         <span className="absolute inset-0" aria-hidden="true" />
-//                                         <span>{item.title}</span>
-//                                         <span aria-hidden="true"> &rarr;</span>
-//                                     </a>
-//                                 </h3>
-//                                 <p className="mt-1 text-sm text-gray-500">{item.description}</p>
-//                                 <div className="flex items-center">
-//                                     {item.batStatus === Battery100Icon ? (
-//                                         <item.batStatus className="h-5 w-5 flex-shrink-0 text-green-500" aria-hidden="true" />
-//                                     ) : item.batStatus === Battery0Icon ? (
-//                                         <item.batStatus className="h-5 w-5 flex-shrink-0 text-red-500 animate-pulse" aria-hidden="true" />
-//                                     ) : (
-//                                         <>
-//                                             <item.batStatus className="h-5 w-5 flex-shrink-0 text-yellow-500" aria-hidden="true" />
-//                                             <svg className="h-4 w-4 ml-1 text-yellow-500 animate-spin" fill="none" viewBox="0 0 24 24">
-//                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-//                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-//                                             </svg>
-//                                         </>
-//                                     )}
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     )
-// }
-
-import {
-    TruckIcon,
-    Battery0Icon, Battery100Icon,
-    Battery50Icon
-} from '@heroicons/react/24/outline'
-import './blink.css'
-
-const items = [
-    { title: 'ZEROX001-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX003-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX002-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX004-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX006-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX005-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX007-TN', description: 'Iveco S-Way', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX009-TN', description: 'Kenworth T680', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX008-TN', description: 'Freightliner Cascadia', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX010-TN', description: 'Peterbilt 579', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX012-TN', description: 'Mack Anthem', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX011-TN', description: 'Western Star 5700', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX013-TN', description: 'International LT', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX015-TN', description: 'Freightliner Argosy', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX014-TN', description: 'Volvo VNL', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX016-TN', description: 'Kenworth W990', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX018-TN', description: 'Western Star 4900', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX017-TN', description: 'Peterbilt 389', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX019-TN', description: 'Mack Pinnacle', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX021-TN', description: 'Mercedes Atego', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX020-TN', description: 'International ProStar', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX022-TN', description: 'Volvo FM', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX024-TN', description: 'MAN TGS', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX023-TN', description: 'Scania P-series', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX025-TN', description: 'Renault D-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX027-TN', description: 'Iveco Trakker', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX026-TN', description: 'DAF CF', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX028-TN', description: 'Freightliner M2', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX030-TN', description: 'Peterbilt 567', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX029-TN', description: 'Kenworth T800', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX031-TN', description: 'Western Star 4700', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX033-TN', description: 'International HV', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX032-TN', description: 'Mack Granite', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX034-TN', description: 'Volvo VHD', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX036-TN', description: 'Kenworth C500', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX035-TN', description: 'Freightliner 122SD', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX037-TN', description: 'Peterbilt 520', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX039-TN', description: 'Mack TerraPro', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX038-TN', description: 'Western Star 6900', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX040-TN', description: 'International WorkStar', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX042-TN', description: 'Volvo FE', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX041-TN', description: 'Mercedes Econic', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX043-TN', description: 'Scania G-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX045-TN', description: 'Renault C-series', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX044-TN', description: 'MAN TGL', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
-    { title: 'ZEROX046-TN', description: 'DAF LF', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon },
-    { title: 'ZEROX048-TN', description: 'Freightliner 108SD', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery50Icon },
-    { title: 'ZEROX047-TN', description: 'Iveco Eurocargo', icon: TruckIcon, background: 'bg-gray-500', batStatus: Battery0Icon },
+const headers = [
+  { key: 'title', label: 'Title' },
+  { key: 'description', label: 'Description' },
+  { key: 'icon', label: 'Icon' },
+  { key: 'batStatus', label: 'Battery Status' },
+  { key: 'batteryPercentage', label: 'Battery Percentage' },
+  { key: 'chargingStation', label: 'Charging Station' },
+  { key: 'location', label: 'Location' },
+  { key: 'status', label: 'Status' },
 ];
 
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-}
-
-export default function Example() {
-    // Group items based on battery status
-    const fullyChargedItems = items.filter(item => item.batStatus === Battery100Icon);
-    const chargingItems = items.filter(item => item.batStatus === Battery50Icon);
-    const needChargeItems = items.filter(item => item.batStatus === Battery0Icon);
-
-    // Function to render a group of items
-    const renderGroup = (groupItems) => (
-        <div className="space-y-4">
-            {groupItems.map((item, itemIdx) => (
-                <div key={itemIdx} className="flow-root">
-                    <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-indigo-500 hover:bg-gray-50">
-                        <div
-                            className={classNames(
-                                item.background,
-                                'flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg'
-                            )}
-                        >
-                            <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-medium text-gray-900">
-                                <a href="#" className="focus:outline-none">
-                                    <span className="absolute inset-0" aria-hidden="true" />
-                                    <span>{item.title}</span>
-                                    <span aria-hidden="true"> &rarr;</span>
-                                </a>
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500">{item.description}</p>
-                            <div className="flex items-center">
-                                {item.batStatus === Battery100Icon ? (
-                                    <item.batStatus className="h-5 w-5 flex-shrink-0 text-green-500" aria-hidden="true" />
-                                ) : item.batStatus === Battery0Icon ? (
-                                    <item.batStatus className="h-5 w-5 flex-shrink-0 text-red-500 animate-pulse" aria-hidden="true" />
-                                ) : (
-                                    <>
-                                        <item.batStatus className="h-5 w-5 flex-shrink-0 text-yellow-500" aria-hidden="true" />
-                                        <svg className="h-4 w-4 ml-1 text-yellow-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-
+const items = [
+  { title: 'ZEROX001-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 1', batteryPercentage: 100, location: 'Warehouse A', status: 'Available' },
+  { title: 'ZEROX002-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 2', batteryPercentage: 50, location: 'Warehouse B', status: 'Charging' },
+  { title: 'ZEROX003-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 3', batteryPercentage: 20, location: 'Warehouse C', status: 'In Transit' },
+  { title: 'ZEROX004-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 4', batteryPercentage: 100, location: 'Warehouse A', status: 'Available' },
+  { title: 'ZEROX005-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 5', batteryPercentage: 50, location: 'Warehouse B', status: 'Charging' },
+  { title: 'ZEROX006-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 6', batteryPercentage: 20, location: 'Warehouse C', status: 'In Transit' },
+  { title: 'ZEROX007-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 7', batteryPercentage: 100, location: 'Warehouse D', status: 'Available' },
+  { title: 'ZEROX008-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 8', batteryPercentage: 50, location: 'Warehouse A', status: 'Charging' },
+  { title: 'ZEROX009-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 9', batteryPercentage: 20, location: 'Warehouse B', status: 'In Transit' },
+  { title: 'ZEROX010-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 10', batteryPercentage: 100, location: 'Warehouse C', status: 'Available' },
+  { title: 'ZEROX011-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 1', batteryPercentage: 50, location: 'Warehouse D', status: 'Charging' },
+  { title: 'ZEROX012-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 2', batteryPercentage: 20, location: 'Warehouse A', status: 'In Transit' },
+  { title: 'ZEROX013-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 3', batteryPercentage: 100, location: 'Warehouse B', status: 'Available' },
+  { title: 'ZEROX014-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 4', batteryPercentage: 50, location: 'Warehouse C', status: 'Charging' },
+  { title: 'ZEROX015-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 5', batteryPercentage: 20, location: 'Warehouse D', status: 'In Transit' },
+  { title: 'ZEROX016-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 6', batteryPercentage: 100, location: 'Warehouse A', status: 'Available' },
+  { title: 'ZEROX017-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 7', batteryPercentage: 50, location: 'Warehouse B', status: 'Charging' },
+  { title: 'ZEROX018-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 8', batteryPercentage: 20, location: 'Warehouse C', status: 'In Transit' },
+  { title: 'ZEROX019-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 9', batteryPercentage: 100, location: 'Warehouse D', status: 'Available' },
+  { title: 'ZEROX020-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 10', batteryPercentage: 50, location: 'Warehouse A', status: 'Charging' },
+  { title: 'ZEROX021-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 1', batteryPercentage: 20, location: 'Warehouse B', status: 'In Transit' },
+  { title: 'ZEROX022-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 2', batteryPercentage: 100, location: 'Warehouse C', status: 'Available' },
+  { title: 'ZEROX023-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 3', batteryPercentage: 50, location: 'Warehouse D', status: 'Charging' },
+  { title: 'ZEROX024-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 4', batteryPercentage: 20, location: 'Warehouse A', status: 'In Transit' },
+  { title: 'ZEROX025-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 5', batteryPercentage: 100, location: 'Warehouse B', status: 'Available' },
+  { title: 'ZEROX026-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 6', batteryPercentage: 50, location: 'Warehouse C', status: 'Charging' },
+  { title: 'ZEROX027-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 7', batteryPercentage: 20, location: 'Warehouse D', status: 'In Transit' },
+  { title: 'ZEROX028-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 8', batteryPercentage: 100, location: 'Warehouse A', status: 'Available' },
+  { title: 'ZEROX029-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 9', batteryPercentage: 50, location: 'Warehouse B', status: 'Charging' },
+  { title: 'ZEROX030-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 10', batteryPercentage: 20, location: 'Warehouse C', status: 'In Transit' },
+  { title: 'ZEROX031-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 1', batteryPercentage: 100, location: 'Warehouse D', status: 'Available' },
+  { title: 'ZEROX032-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 2', batteryPercentage: 50, location: 'Warehouse A', status: 'Charging' },
+  { title: 'ZEROX033-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 3', batteryPercentage: 20, location: 'Warehouse B', status: 'In Transit' },
+  { title: 'ZEROX034-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 4', batteryPercentage: 100, location: 'Warehouse C', status: 'Available' },
+  { title: 'ZEROX035-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 5', batteryPercentage: 50, location: 'Warehouse D', status: 'Charging' },
+  { title: 'ZEROX036-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 6', batteryPercentage: 20, location: 'Warehouse A', status: 'In Transit' },
+  { title: 'ZEROX037-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 7', batteryPercentage: 100, location: 'Warehouse B', status: 'Available' },
+  { title: 'ZEROX038-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 8', batteryPercentage: 50, location: 'Warehouse C', status: 'Charging' },
+  { title: 'ZEROX039-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 9', batteryPercentage: 20, location: 'Warehouse D', status: 'In Transit' },
+  { title: 'ZEROX040-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 10', batteryPercentage: 100, location: 'Warehouse A', status: 'Available' },
+  { title: 'ZEROX041-TN', description: 'Iveco Stralis', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 1', batteryPercentage: 50, location: 'Warehouse B', status: 'Charging' },
+  { title: 'ZEROX042-TN', description: 'DAF XF', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 2', batteryPercentage: 20, location: 'Warehouse C', status: 'In Transit' },
+  { title: 'ZEROX043-TN', description: 'Mercedes Actros', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 3', batteryPercentage: 100, location: 'Warehouse D', status: 'Available' },
+  { title: 'ZEROX044-TN', description: 'Volvo FH16', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 4', batteryPercentage: 50, location: 'Warehouse A', status: 'Charging' },
+  { title: 'ZEROX045-TN', description: 'Scania R-series', icon: TruckIcon, background: 'bg-red-500', batStatus: Battery0Icon, chargingStation: 'Dock 5', batteryPercentage: 20, location: 'Warehouse B', status: 'In Transit' },
+  { title: 'ZEROX046-TN', description: 'Renault T-series', icon: TruckIcon, background: 'bg-green-500', batStatus: Battery100Icon, chargingStation: 'Dock 6', batteryPercentage: 100, location: 'Warehouse C', status: 'Available' },
+  { title: 'ZEROX047-TN', description: 'MAN TGX', icon: TruckIcon, background: 'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 7', batteryPercentage: 50, location: 'Warehouse D', status: 'Charging' },
+  { title: 'ZEROX048-TN', description: 'Iveco Stralis', icon: TruckIcon, background:'bg-yellow-500', batStatus: Battery50Icon, chargingStation: 'Dock 7', batteryPercentage: 50, location: 'Warehouse D', status: 'Charging'}]
+  
+  export default function Trucks() {
     return (
-        <div>
-            <h2 className="text-base font-semibold leading-6 text-gray-900">Autonomous Trucks</h2>
-            <p className="mt-1 text-sm text-gray-500">
-                Please check the battery status of the trucks here
-            </p>
-            <div className="relative mt-4">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center">
-                    <span className="bg-white px-2 text-sm text-gray-500"></span>
-                </div>
-            </div>
-            <div className="mt-4 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                    <div className="mb-4 text-sm text-gray-500">Trucks charged</div>
-                    {renderGroup(fullyChargedItems)}
-                </div>
-                <div>
-                    <div className="mb-4 text-sm text-gray-500">Trucks on charge</div>
-                    {renderGroup(chargingItems)}
-                </div>
-                <div>
-                    <div className="mb-4 text-sm text-gray-500">Trucks to charge</div>
-                    {renderGroup(needChargeItems)}
-                </div>
-            </div>
+      <Layout>
+        <div className="sm:flex sm:items-center mb-5">
+        <div className="sm:flex-auto">
+          <h1 className="text-base font-semibold leading-6 text-gray-900">Trucks</h1>
+          <p className="mt-2 text-sm text-gray-700">
+            A list of all the trucks with their details.
+          </p>
         </div>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button
+            type="button"
+            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Print
+          </button>
+        </div>
+      </div>
+        <Table headers={headers} items={items} />
+      </Layout>
     )
-}
+  }
+  

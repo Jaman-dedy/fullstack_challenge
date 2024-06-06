@@ -1,11 +1,11 @@
 import { Battery0Icon, Battery100Icon, BoltIcon } from '@heroicons/react/20/solid'
-import { CursorArrowRaysIcon, EnvelopeOpenIcon, UsersIcon } from '@heroicons/react/24/outline'
+import { CursorArrowRaysIcon, TruckIcon } from '@heroicons/react/24/outline'
 
 const stats = [
-  { id: 1, name: 'Trucks uncharged', stat: '30', icon: UsersIcon, subIcon: Battery0Icon, change: '0%', changeType: 'decrease' },
-  { id: 2, name: 'Trucks full-charged', stat: '18', icon: EnvelopeOpenIcon, subIcon: Battery100Icon, change: '100%', changeType: 'increase' },
-  { id: 3, name: 'Available dock slot', stat: '0', icon: CursorArrowRaysIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
-  { id: 4, name: 'Trucks on charge', stat: '0', icon: CursorArrowRaysIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
+  { id: 1, name: 'Trucks uncharged', stat: '30', icon: TruckIcon, subIcon: Battery0Icon, change: '0%', changeType: 'decrease' },
+  { id: 2, name: 'Trucks full-charged', stat: '18', icon: TruckIcon, subIcon: Battery100Icon, change: '100%', changeType: 'increase' },
+  { id: 4, name: 'Trucks on charge', stat: '0', icon: TruckIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
+  { id: 3, name: 'Available dock slot', stat: '0', icon: BoltIcon,subIcon: BoltIcon, change: '', changeType: 'increase' },
 ]
 
 function classNames(...classes) {
