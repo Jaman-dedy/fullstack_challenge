@@ -1,29 +1,29 @@
 import { useState, useEffect } from 'react';
 import { BoltIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/20/solid';
-import './style.css'
+import './style.css';
 
-const initialItems = [
-    { title: 'Dock 1', description: 'Available', icon: BoltIcon, background: 'bg-gray-500', status: 'free' },
-    { title: 'Dock 2', description: 'Charging', icon: BoltIcon, background: 'bg-gray-500', status: 'charging', speed: 4 },
-    { title: 'Dock 3', description: 'Charging', icon: BoltIcon, background: 'bg-gray-500', status: 'charging', speed: 1 },
-    { title: 'Dock 4', description: 'Charging', icon: BoltIcon, background: 'bg-gray-500', status: 'charging', speed: 5 },
-    { title: 'Dock 5', description: 'Charging', icon: BoltIcon, background: 'bg-gray-500', status: 'charging', speed : 2 },
-    { title: 'Dock 6', description: 'Charging', icon: BoltIcon, background: 'bg-yellow-500', status: 'charging', speed: 1 },
-    { title: 'Dock 7', description: 'Charging', icon: BoltIcon, background: 'bg-yellow-500', status: 'charging', speed: 2 },
-    { title: 'Dock 8', description: 'Charging', icon: BoltIcon, background: 'bg-yellow-500', status: 'charging', speed: 3 },
-    { title: 'Dock 9', description: 'Charging', icon: BoltIcon, background: 'bg-yellow-500', status: 'charging', speed: 4 },
-    { title: 'Dock 10', description: 'Charging', icon: BoltIcon, background: 'bg-yellow-500', status: 'charging', speed: 5 },
-];
+interface DockProps {
+    item: {
+        title: string;
+        description: string;
+        icon: React.ComponentType<{ className: string }>;
+        background: string;
+        status: string;
+        speed?: number;
+        percentage?: number;
+    }[];
+    onDrop: (truckId: string, dockId: string) => void;
+}
 
-export default function Dock() {
-    const [items, setItems] = useState(initialItems);
+const Docks: React.FC<DockProps> = ({ item, onDrop }) => {
+    const [items, setItems] = useState(item);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setItems((prevItems) =>
                 prevItems.map((item) => {
                     if (item.status === 'charging') {
-                        const newPercentage = (item.percentage || 0) + item.speed;
+                        const newPercentage = (item.percentage || 0) + (item.speed || 0);
                         return { ...item, percentage: newPercentage <= 100 ? newPercentage : 100 };
                     }
                     return item;
@@ -36,6 +36,7 @@ export default function Dock() {
         };
     }, []);
 
+
     return (
         <div>
             <h3 className="text-base font-semibold leading-6 text-gray-900">Charging stations</h3>
@@ -44,7 +45,10 @@ export default function Dock() {
             </p>
             <dl className="mt-5 grid grid-cols-1 gap-1 overflow-hidden rounded-lg bg-white shadow">
                 {items.map((item) => (
-                    <div key={item.title} className="px-4 py-6 sm:px-6 relative">
+                    <div
+                        key={item.title}
+                        className="px-4 py-6 sm:px-6 relative"
+                    >
                         <dt className="text-base font-normal text-gray-900 relative z-10">{item.title}</dt>
                         <dd className="mt-1 flex items-baseline justify-between md:block lg:flex relative z-10">
                             <div className="flex items-baseline text-2xl font-semibold text-indigo-600">
@@ -87,4 +91,6 @@ export default function Dock() {
             </dl>
         </div>
     );
-}
+};
+
+export default Docks;

@@ -1,15 +1,17 @@
 import { Dispatch, SetStateAction } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon, HomeIcon, TruckIcon, BoltIcon } from '@heroicons/react/24/outline';
+import Logo from '@/assets/logo.png';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
 const navigation = [
-    { name: 'Home', href: '#', icon: HomeIcon, current: true },
-    { name: 'Trucks', href: '#', icon: TruckIcon, current: false },
-    { name: 'Docks', href: '#', icon: BoltIcon, current: false },
+    { name: 'Home', href: '/', icon: HomeIcon, current: true },
+    { name: 'Trucks', href: '/trucks', icon: TruckIcon, current: false },
+    { name: 'Docks', href: '/docks', icon: BoltIcon, current: false },
   ];
 
 type SidebarProps = {
@@ -21,7 +23,6 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   return (
     <>
       <Transition show={sidebarOpen}>
-        {/* Mobile sidebar */}
         <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
           <TransitionChild
             enter="transition-opacity ease-linear duration-300"
@@ -62,9 +63,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
 
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
                   <div className="flex h-16 shrink-0 items-center">
-                    <img
+                    <Image
+                      width={500}
+                      height={500}
                       className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+                      src={Logo}
                       alt="Your Company"
                     />
                   </div>
@@ -94,13 +97,13 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           </div>
         </Dialog>
       </Transition>
-
-      {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-20 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
         <div className="flex h-16 shrink-0 items-center justify-center">
-          <img
+          <Image
+            width={500}
+            height={500}
             className="h-8 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
+            src={Logo}
             alt="Your Company"
           />
         </div>
