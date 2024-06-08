@@ -1,0 +1,57 @@
+mine_site,blasting_material,quantity,unit
+Site001,Ammonium Nitrate,1000,kg
+Site001,Dynamite,500,sticks
+Site001,Blasting Caps,200,pieces
+Site001,Detonating Cord,1500,meters
+Site002,Ammonium Nitrate,1200,kg
+Site002,Dynamite,600,sticks
+Site002,Blasting Caps,250,pieces
+Site002,Detonating Cord,1800,meters
+Site003,Ammonium Nitrate,1500,kg
+Site003,Dynamite,750,sticks
+Site003,Blasting Caps,300,pieces
+Site003,Detonating Cord,2000,meters
+Site004,Ammonium Nitrate,1800,kg
+Site004,Dynamite,900,sticks
+Site004,Blasting Caps,350,pieces
+Site004,Detonating Cord,2200,meters
+Site005,Ammonium Nitrate,2000,kg
+Site005,Dynamite,1000,sticks
+Site005,Blasting Caps,400,pieces
+Site005,Detonating Cord,2500,meters
+Site006,Ammonium Nitrate,1100,kg
+Site006,Dynamite,550,sticks
+Site006,Blasting Caps,220,pieces
+Site006,Detonating Cord,1600,meters
+Site007,Ammonium Nitrate,1300,kg
+Site007,Dynamite,650,sticks
+Site007,Blasting Caps,260,pieces
+Site007,Detonating Cord,1900,meters
+Site008,Ammonium Nitrate,1600,kg
+Site008,Dynamite,800,sticks
+Site008,Blasting Caps,320,pieces
+Site008,Detonating Cord,2100,meters
+Site009,Ammonium Nitrate,1900,kg
+Site009,Dynamite,950,sticks
+Site009,Blasting Caps,380,pieces
+Site009,Detonating Cord,2400,meters
+Site010,Ammonium Nitrate,2100,kg
+Site010,Dynamite,1050,sticks
+Site010,Blasting Caps,420,pieces
+Site010,Detonating Cord,2600,meters
+Site011,Ammonium Nitrate,1200,kg
+Site011,Dynamite,600,sticks
+Site011,Blasting Caps,240,pieces
+Site011,Detonating Cord,1700,meters
+Site012,Ammonium Nitrate,1400,kg
+Site012,Dynamite,700,sticks
+Site012,Blasting Caps,280,pieces
+Site012,Detonating Cord,2000,meters
+Site013,Ammonium Nitrate,1700,kg
+Site013,Dynamite,850,sticks
+Site013,Blasting Caps,340,pieces
+Site013,Detonating Cord,2200,meters
+Site014,Ammonium Nitrate,2000,kg
+Site014,Dynamite,1000,sticks
+Site014,Blasting Caps,400,pieces
+Site014,Detonating Cord,2500,meters
