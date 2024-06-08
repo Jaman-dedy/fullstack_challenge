@@ -1,6 +1,6 @@
 # Blasting Data Management Script
 
-This script is designed to manage blasting data for ZeroX, a leading supplier of blasting materials. It performs the following tasks: testing the github action
+This script is designed to manage blasting data for ZeroX, a leading supplier of blasting materials. It performs the following tasks:
 
 1. Sorts the blasting data by mine site.
 2. Creates SQLite databases for each mine site.
