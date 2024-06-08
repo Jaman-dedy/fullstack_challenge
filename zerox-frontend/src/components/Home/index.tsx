@@ -36,6 +36,8 @@
 //   );
 // }
 
+import Layout from '@/components/Layout'
+import Stats from '@/components/Stats'
 import {trucksData} from '@/data/trucks'
 import {docksData} from '@/data/docks'
 
@@ -51,20 +53,14 @@ import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 
 import Board from '@/components/Board'
-import {DEFAULT_CARDS} from '@/data/cards.ts'
 
 export default function CustomKanban () {
   return (
-    <div className="h-screen w-full bg-neutral-900 text-neutral-50">
+    <Layout>
+       <div className="lg:mx-4 mx-2">
+          <Stats/>
+        </div>
       <Board />
-    </div>
+    </Layout>
   );
-};
-
-type ColumnType = "fully_charged" | "need_to_be_charged" | "docks";
-
-type CardType = {
-  title: string;
-  id: string;
-  column: ColumnType;
 };

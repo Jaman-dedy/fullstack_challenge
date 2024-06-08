@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 
 import DropIndicator from '@/components/DropIndicator'
 import Card from '@/components/Card'
+import {ColumnType, CardType} from '@/types'
 
 type ColumnProps = {
     title: string;

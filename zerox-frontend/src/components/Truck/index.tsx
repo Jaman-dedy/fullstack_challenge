@@ -53,14 +53,14 @@ const Trucks: React.FC = ({ }) => {
                         ))}
                     </div>
                 </div>
-                <div>
+                {/* <div>
                     <div className="mb-4 text-sm text-gray-500">Trucks on charge</div>
                     <div className="space-y-4">
                         {chargingItems.map((item, index) => (
                             <Truck key={index} item={item} />
                         ))}
                     </div>
-                </div>
+                </div> */}
                 <div>
                     <div className="mb-4 text-sm text-gray-500">Trucks to charge</div>
 
