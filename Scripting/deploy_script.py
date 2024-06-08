@@ -78,6 +78,8 @@ def deploy_database_to_region(db_file, region):
     try:
         efs_dir = f"aws_efs/{region}"
         os.makedirs(efs_dir, exist_ok=True)
+        # Create the "databases" directory if it doesn't exist
+        os.makedirs("databases", exist_ok=True)
         src_path = os.path.join("databases", db_file)
         dest_path = os.path.join(efs_dir, db_file)
         shutil.copy(src_path, dest_path)
@@ -101,6 +103,9 @@ def main():
     # Write sorted data to CSV file
     fieldnames = ['mine_site', 'blasting_material', 'quantity', 'unit']
     write_csv_data(sorted_data_file, sorted_data, fieldnames)
+
+    # Create the "databases" directory if it doesn't exist
+    os.makedirs("databases", exist_ok=True)
 
     # Create SQLite databases for each mine site and import data
     mine_sites = set(row['mine_site'] for row in sorted_data)
