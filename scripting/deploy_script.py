@@ -4,6 +4,7 @@ import os
 import shutil
 import logging
 import traceback
+from cryptography.fernet import Fernet
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,15 +29,31 @@ def read_csv_data(file_path):
         traceback.print_exc()
         return []
 
-def write_csv_data(file_path, data, fieldnames):
+def encrypt_data(data, encryption_key):
     """
-    Write data to a CSV file with the specified fieldnames.
+    Encrypt sensitive data in the given dictionary using the provided encryption key.
+    """
+    f = Fernet(encryption_key)
+    encrypted_data = {}
+    for key, value in data.items():
+        if key in ['blasting_material', 'quantity']:
+            encrypted_value = f.encrypt(str(value).encode()).decode()
+            encrypted_data[key] = encrypted_value
+        else:
+            encrypted_data[key] = value
+    return encrypted_data
+
+def write_csv_data(file_path, data, fieldnames, encryption_key):
+    """
+    Write data to a CSV file with the specified fieldnames, encrypting sensitive data.
     """
     try:
         with open(file_path, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(data)
+            for row in data:
+                encrypted_row = encrypt_data(row, encryption_key)
+                writer.writerow(encrypted_row)
     except Exception as e:
         logging.error(f"Error writing CSV file: {str(e)}")
 
@@ -45,7 +62,7 @@ def create_database(db_name):
     Create a SQLite database with the specified name and return a connection to it.
     """
     try:
-        conn = sqlite3.connect(db_name)
+        conn = sqlite3.connect(db_name, check_same_thread=False, uri=True)
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS blasting_data
                           (blasting_material TEXT, quantity INTEGER, unit TEXT)''')
@@ -100,9 +117,12 @@ def main():
     # Sort data by mine site
     sorted_data = sorted(data, key=lambda row: row['mine_site'])
 
-    # Write sorted data to CSV file
+    # Generate a random encryption key
+    encryption_key = Fernet.generate_key()
+
+    # Write sorted data to CSV file with encrypted sensitive data
     fieldnames = ['mine_site', 'blasting_material', 'quantity', 'unit']
-    write_csv_data(sorted_data_file, sorted_data, fieldnames)
+    write_csv_data(sorted_data_file, sorted_data, fieldnames, encryption_key)
 
     # Create the "databases" directory if it doesn't exist
     os.makedirs("databases", exist_ok=True)
