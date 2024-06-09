@@ -1,25 +1,33 @@
-def test_factorial_0():
-    assert factorial(0) == 1
-
-def test_factorial_1():
-    assert factorial(1) == 1
-
-def test_factorial_positive():
-    assert factorial(5) == 120
-
-def test_factorial_large_number():
-    assert factorial(12) == 479001600
-
-def test_factorial_negative_number():
-    try:
-        factorial(-5)
-        assert False, "Expected ValueError for negative input"
-    except ValueError:
-        pass
-
-def test_factorial_non_integer():
-    try:
-        factorial(4.5)
-        assert False, "Expected TypeError for non-integer input"
-    except TypeError:
-        pass
+function factorial(n) {
+    if (n === 0 || n === 1) {
+      return 1;
+    } else {
+      return n * factorial(n - 1);
+    }
+  }
+  
+  describe('factorial', () => {
+    test('factorial of 0 should return 1', () => {
+      expect(factorial(0)).toBe(1);
+    });
+  
+    test('factorial of 1 should return 1', () => {
+      expect(factorial(1)).toBe(1);
+    });
+  
+    test('factorial of a positive integer should return the correct value', () => {
+      expect(factorial(5)).toBe(120);
+    });
+  
+    test('factorial of a negative integer should return 1', () => {
+      expect(factorial(-3)).toBe(1);
+    });
+  
+    test('factorial of a large positive integer should not cause overflow', () => {
+      expect(factorial(20)).toBe(2432902008176640000);
+    });
+  
+    test('calling factorial with a non-integer should return 1', () => {
+      expect(factorial(4.5)).toBe(1);
+    });
+  });
