@@ -1,7 +1,7 @@
 defmodule InventoryApiWeb.InventoriesController do
   use InventoryApiWeb, :controller
 
-  alias InventoryApi.Inventory.Inventories
+  # alias InventoryApi.Inventory.Inventories
   alias InventoryApi.Services.InventoryService
 
   action_fallback(InventoryApiWeb.FallbackController)

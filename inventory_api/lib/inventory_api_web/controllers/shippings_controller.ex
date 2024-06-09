@@ -41,13 +41,14 @@ defmodule InventoryApiWeb.ShippingsController do
           {:error, :empty_shipped_array} ->
             conn
             |> put_status(:unprocessable_entity)
-            |> json(%{error: "Shipped array cannot be empty"})
+            |> json(%{message: "Shipped array cannot be empty"})
 
           {:error, :product_not_found} ->
             conn
             |> put_status(:unprocessable_entity)
             |> json(%{
-              error: "One or more products id provided does not have a matching order, please ship what you have ordered"
+              status: "error",
+              message: "One or more products id provided does not have a matching order, please ship what you have ordered"
             })
 
           {:error, reason} when is_binary(reason) ->
@@ -108,9 +109,26 @@ defmodule InventoryApiWeb.ShippingsController do
   def get_shipped_packages_by_order_id(conn, %{"order_id" => order_id}) do
     case ShippingService.get_shipped_packages_by_order_id(order_id) do
       {:ok, shipped_packages} ->
+        shipped_packages_map = Enum.map(shipped_packages, fn package ->
+          %{
+            id: package.id,
+            order_id: package.order_id,
+            quantity: package.quantity,
+            product: %{
+              id: package.product.id,
+              product_name: package.product.product_name,
+              mass_kg: package.product.mass_kg,
+              product_id: package.product.product_id
+            },
+            status: package.status,
+            inserted_at: package.inserted_at,
+            updated_at: package.updated_at
+          }
+        end)
+
         conn
         |> put_status(:ok)
-        |> json(%{status: "success", shipped_packages: shipped_packages})
+        |> json(%{status: "success", shipped_packages: shipped_packages_map})
 
       {:error, :shipped_packages_not_found} ->
         conn
@@ -118,5 +136,4 @@ defmodule InventoryApiWeb.ShippingsController do
         |> json(%{status: "error", message: "Shipped packages not found for the given order ID"})
     end
   end
-
 end

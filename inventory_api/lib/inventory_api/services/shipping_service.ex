@@ -98,6 +98,16 @@ defmodule InventoryApi.Services.ShippingService do
     end
   end
 
+  def handle_call({:get_shipped_packages_by_order_id, order_id}, _from, state) do
+    case Shippings.get_shipping_records_by_order_id(order_id) do
+      [] ->
+        {:reply, {:error, :shipped_packages_not_found}, state}
+
+      shipped_packages ->
+        {:reply, {:ok, shipped_packages}, state}
+    end
+  end
+
   defp all_products_exist?(shipped_items) do
     product_ids = Enum.map(shipped_items, & &1["product_id"])
 
@@ -175,15 +185,5 @@ defmodule InventoryApi.Services.ShippingService do
       end)
 
     total_quantity <= @max_package_size
-  end
-
-  def handle_call({:get_shipped_packages_by_order_id, order_id}, _from, state) do
-    case Shippings.get_shipping_records_by_order_id(order_id) do
-      [] ->
-        {:reply, {:error, :shipped_packages_not_found}, state}
-
-      shipped_packages ->
-        {:reply, {:ok, shipped_packages}, state}
-    end
   end
 end

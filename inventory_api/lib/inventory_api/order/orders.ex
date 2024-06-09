@@ -49,7 +49,8 @@ defmodule InventoryApi.Order.Orders do
   def get_order_items_by_order_id(order_id) do
     Repo.all(
       from order_item in __MODULE__,
-      where: order_item.order_id == ^order_id
+      where: order_item.order_id == ^order_id,
+      preload: [:product]
     )
   end
 

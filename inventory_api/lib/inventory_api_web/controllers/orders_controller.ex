@@ -241,7 +241,12 @@ defmodule InventoryApiWeb.OrdersController do
             Enum.map(order_items, fn item ->
               %{
                 id: item.id,
-                product_id: item.product_id,
+                product: %{
+                id: item.product.id,
+                product_name: item.product.product_name,
+                mass_kg: item.product.mass_kg,
+                product_id: item.product.product_id
+              },
                 quantity: item.quantity,
                 status: item.status,
                 inserted_at: item.inserted_at,

@@ -3,7 +3,7 @@ defmodule InventoryApi.Shipping.Shippings do
   import Ecto.Changeset
   import Ecto.Query
   alias InventoryApi.Repo
-  alias InventoryApi.Product.Products
+  alias InventoryApi.Catalog.Products
 
   @derive {Jason.Encoder, only: [:id, :order_id, :quantity, :product_id, :status, :inserted_at, :updated_at]}
   schema "shippings" do
@@ -35,7 +35,10 @@ defmodule InventoryApi.Shipping.Shippings do
   end
 
   def get_shipping_records_by_order_id(order_id) do
-    Repo.all(from s in __MODULE__, where: s.order_id == ^order_id)
+    Repo.all(from s in __MODULE__,
+    where: s.order_id == ^order_id,
+    preload: [:product]
+    )
   end
 
   def update_shipping(%__MODULE__{} = shipping, attrs) do
