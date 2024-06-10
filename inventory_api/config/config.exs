@@ -1,11 +1,13 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-
-# General application configuration
 import Config
+
+config :inventory_api, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/swagger.json" => [
+      router: InventoryApiWeb.Router,
+      endpoint: InventoryApiWeb.Endpoint
+    ]
+  }
+config :phoenix_swagger, json_library: Jason
 
 config :inventory_api,
   ecto_repos: [InventoryApi.Repo],

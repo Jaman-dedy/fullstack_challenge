@@ -20,6 +20,34 @@ defmodule InventoryApiWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/api/swagger" do
+    forward "/", PhoenixSwagger.Plug.SwaggerUI,
+      otp_app: :inventory_api,
+      swagger_file: "swagger.json",
+      disable_validator: true
+  end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "Inventory API"
+      },
+      schemes: ["http", "https"],
+      consumes: ["application/json"],
+      produces: ["application/json"],
+      tags: [
+        %{name: "Inventories", description: "Operations about Inventories"}
+      ],
+
+      definitions: Map.merge(
+      InventoryApiWeb.InventorySchemas.swagger_definitions(),
+      InventoryApiWeb.OrderSchemas.swagger_definitions()
+      )
+      |> Map.merge(InventoryApiWeb.ShippingSchemas.swagger_definitions())
+    }
+  end
+
   scope "/api", InventoryApiWeb do
     pipe_through :api
 

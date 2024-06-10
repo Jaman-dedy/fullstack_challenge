@@ -1,11 +1,26 @@
 defmodule InventoryApiWeb.ShippingsController do
   use InventoryApiWeb, :controller
+  use PhoenixSwagger
 
-  alias InventoryApi.Shipping.Shippings
   alias InventoryApi.Services.ShippingService
   alias InventoryApi.Services.InventoryService
 
   action_fallback(InventoryApiWeb.FallbackController)
+
+  swagger_path :ship_package do
+    post "/api/ship_package"
+    summary "Ship a package"
+    description "Ship a package for an order"
+    produces "application/json"
+    parameters do
+      order_id :query, :string, "ID of the order", required: true
+      shipped :body, Schema.array(:ShippedItem), "List of shipped items", required: true
+    end
+    response 200, "Success", Schema.ref(:ShipPackageResponse)
+    response 400, "Bad Request", Schema.ref(:ErrorResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
+    response 422, "Unprocessable Entity", Schema.ref(:ErrorResponse)
+  end
 
   def ship_package(conn, %{"order_id" => order_id, "shipped" => shipped}) do
     case InventoryService.is_catalog_initialized?() do
@@ -94,16 +109,16 @@ defmodule InventoryApiWeb.ShippingsController do
     |> json(%{error: "Invalid parameters"})
   end
 
-  def show(conn, %{"id" => id}) do
-    case Shippings.get_shipping(id) do
-      nil ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{error: "Shipping not found"})
-
-      shipping ->
-        render(conn, "show.json", shipping: shipping)
+  swagger_path :get_shipped_packages_by_order_id do
+    get "/api/shippings/{order_id}"
+    summary "Get shipped packages by order ID"
+    description "Retrieve shipped packages for a specific order"
+    produces "application/json"
+    parameters do
+      order_id :path, :string, "ID of the order", required: true
     end
+    response 200, "Success", Schema.ref(:GetShippedPackagesResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
   end
 
   def get_shipped_packages_by_order_id(conn, %{"order_id" => order_id}) do

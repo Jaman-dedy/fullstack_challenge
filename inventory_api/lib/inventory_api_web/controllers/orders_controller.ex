@@ -1,11 +1,25 @@
 defmodule InventoryApiWeb.OrdersController do
   use InventoryApiWeb, :controller
+  use PhoenixSwagger
 
-  alias InventoryApi.Order.Orders
   alias InventoryApi.Services.OrderService
   alias InventoryApi.Services.InventoryService
 
   action_fallback(InventoryApiWeb.FallbackController)
+
+  swagger_path :process_order do
+    post "/api/process_order"
+    summary "Process an order"
+    description "Process an order with the requested items"
+    produces "application/json"
+    parameters do
+      requested :body, Schema.array(:OrderItem), "List of requested items", required: true
+      order_id :query, :string, "ID of the order", required: true
+    end
+    response 200, "Success", Schema.ref(:ProcessOrderResponse)
+    response 400, "Bad Request", Schema.ref(:ErrorResponse)
+    response 422, "Unprocessable Entity", Schema.ref(:ErrorResponse)
+  end
 
   def process_order(conn, %{"requested" => requested} = params) do
     case InventoryService.is_catalog_initialized?() do
@@ -79,91 +93,6 @@ defmodule InventoryApiWeb.OrdersController do
     end
   end
 
-  # def index(conn, _params) do
-  #   orders = Orders.list_orders()
-  #   render(conn, "index.json", orders: orders)
-  # end
-
-  # def create(conn, %{"order" => order_params}) do
-  #   case validate_create_order_params(order_params) do
-  #     {:ok, order_params} ->
-  #       case OrderService.create_order(order_params) do
-  #         {:ok, order} ->
-  #           conn
-  #           |> put_status(:created)
-  #           |> put_resp_header("location", ~p"/api/orders/#{order.id}")
-  #           |> render("show.json", order: order)
-
-  #         {:error, changeset} ->
-  #           conn
-  #           |> put_status(:unprocessable_entity)
-  #           |> render("error.json", changeset: changeset)
-  #       end
-
-  #     {:error, reason} ->
-  #       conn
-  #       |> put_status(:bad_request)
-  #       |> json(%{error: reason})
-  #   end
-  # end
-
-  # def show(conn, %{"id" => id}) do
-  #   case OrderService.get_order(id) do
-  #     {:ok, order} ->
-  #       render(conn, "show.json", order: order)
-
-  #     {:error, :not_found} ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Order not found"})
-  #   end
-  # end
-
-  # def update(conn, %{"id" => id, "order" => order_params}) do
-  #   case validate_update_order_params(order_params) do
-  #     {:ok, order_params} ->
-  #       case OrderService.update_order(id, order_params) do
-  #         {:ok, updated_order} ->
-  #           render(conn, "show.json", order: updated_order)
-
-  #         {:error, :not_found} ->
-  #           conn
-  #           |> put_status(:not_found)
-  #           |> json(%{error: "Order not found"})
-
-  #         {:error, changeset} ->
-  #           conn
-  #           |> put_status(:unprocessable_entity)
-  #           |> render("error.json", changeset: changeset)
-  #       end
-
-  #     {:error, reason} ->
-  #       conn
-  #       |> put_status(:bad_request)
-  #       |> json(%{error: reason})
-  #   end
-  # end
-
-  # def delete(conn, %{"id" => id}) do
-  #   case Orders.get_order(id) do
-  #     nil ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Order not found"})
-
-  #     order ->
-  #       case Orders.delete_order(order) do
-  #         {:ok, _deleted_order} ->
-  #           send_resp(conn, :no_content, "")
-
-  #         {:error, reason} ->
-  #           conn
-  #           |> put_status(:unprocessable_entity)
-  #           |> json(%{error: reason})
-  #       end
-  #   end
-  # end
-
   defp validate_order_params(order_params) do
     cond do
       !Map.has_key?(order_params, "order_id") ->
@@ -206,30 +135,16 @@ defmodule InventoryApiWeb.OrdersController do
     end
   end
 
-  defp validate_create_order_params(order_params) do
-    cond do
-      !Map.has_key?(order_params, "customer_id") ->
-        {:error, "Missing customer_id parameter"}
-
-      !Map.has_key?(order_params, "items") ->
-        {:error, "Missing items parameter"}
-
-      !is_list(order_params["items"]) ->
-        {:error, "Items parameter must be a list"}
-
-      true ->
-        {:ok, order_params}
+  swagger_path :get_order_by_order_id do
+    get "/api/orders/{order_id}"
+    summary "Get an order by ID"
+    description "Retrieve an order by its ID"
+    produces "application/json"
+    parameters do
+      order_id :path, :string, "ID of the order", required: true
     end
-  end
-
-  defp validate_update_order_params(order_params) do
-    cond do
-      !Map.has_key?(order_params, "status") ->
-        {:error, "Missing status parameter"}
-
-      true ->
-        {:ok, order_params}
-    end
+    response 200, "Success", Schema.ref(:GetOrderResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
   end
 
   def get_order_by_order_id(conn, %{"order_id" => order_id}) do

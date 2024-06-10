@@ -1,0 +1,811 @@
+{
+  "info": {
+    "version": "1.0",
+    "title": "Inventory API"
+  },
+  "host": "localhost:4000",
+  "definitions": {
+    "InitCatalogRequest": {
+      "description": "Request payload for initializing the product catalog",
+      "properties": {
+        "product_info": {
+          "description": "List of products to initialize the catalog with",
+          "items": {
+            "$ref": "#/definitions/Product"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Init Catalog Request",
+      "type": "object"
+    },
+    "InitCatalogResponse": {
+      "description": "Response payload for a successful catalog initialization",
+      "properties": {
+        "catalog": {
+          "description": "Initialized product catalog",
+          "items": {
+            "$ref": "#/definitions/Product"
+          },
+          "type": "array"
+        },
+        "message": {
+          "description": "Success message",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the initialization operation",
+          "type": "string"
+        }
+      },
+      "title": "Init Catalog Response",
+      "type": "object"
+    },
+    "ErrorResponse": {
+      "description": "Response payload for an error",
+      "properties": {
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the error",
+          "type": "string"
+        }
+      },
+      "title": "Error Response",
+      "type": "object"
+    },
+    "GetCatalogResponse": {
+      "description": "Response payload for retrieving the product catalog",
+      "properties": {
+        "catalog": {
+          "description": "Product catalog",
+          "items": {
+            "$ref": "#/definitions/Product"
+          },
+          "type": "array"
+        },
+        "status": {
+          "description": "Status of the operation",
+          "type": "string"
+        }
+      },
+      "title": "Get Catalog Response",
+      "type": "object"
+    },
+    "ReInitCatalogResponse": {
+      "description": "Response payload for resetting the product catalog",
+      "properties": {
+        "message": {
+          "description": "Success message",
+          "type": "string"
+        }
+      },
+      "title": "Re-Init Catalog Response",
+      "type": "object"
+    },
+    "RestockItem": {
+      "description": "An item to restock in the inventory",
+      "properties": {
+        "product_id": {
+          "description": "ID of the product to restock",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Quantity to add to the inventory",
+          "type": "integer"
+        }
+      },
+      "title": "Restock Item",
+      "type": "object"
+    },
+    "RestockResponse": {
+      "description": "Response payload for a successful restock",
+      "properties": {
+        "inventories": {
+          "description": "Updated inventory details",
+          "items": {
+            "$ref": "#/definitions/Inventory"
+          },
+          "type": "array"
+        },
+        "message": {
+          "description": "Success message",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the restock operation",
+          "type": "string"
+        }
+      },
+      "title": "Restock Response",
+      "type": "object"
+    },
+    "GetInventoriesResponse": {
+      "description": "Response payload for retrieving inventories",
+      "properties": {
+        "inventories": {
+          "description": "List of inventories",
+          "items": {
+            "$ref": "#/definitions/Inventory"
+          },
+          "type": "array"
+        },
+        "status": {
+          "description": "Status of the operation",
+          "type": "string"
+        }
+      },
+      "title": "Get Inventories Response",
+      "type": "object"
+    },
+    "OrderItem": {
+      "description": "An item in an order",
+      "properties": {
+        "product_id": {
+          "description": "ID of the product",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Quantity of the product",
+          "type": "integer"
+        }
+      },
+      "title": "Order Item",
+      "type": "object"
+    },
+    "ProcessOrderResponse": {
+      "description": "Response payload for processing an order",
+      "properties": {
+        "message": {
+          "description": "Success or error message",
+          "type": "string"
+        },
+        "order_items": {
+          "description": "List of processed order items",
+          "items": {
+            "$ref": "#/definitions/OrderItemResponse"
+          },
+          "type": "array"
+        },
+        "status": {
+          "description": "Status of the order processing",
+          "type": "string"
+        }
+      },
+      "title": "Process Order Response",
+      "type": "object"
+    },
+    "ShippedItem": {
+      "description": "An item in a shipped package",
+      "properties": {
+        "product_id": {
+          "description": "ID of the product",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Quantity of the product",
+          "type": "integer"
+        }
+      },
+      "title": "Shipped Item",
+      "type": "object"
+    },
+    "ShipPackageResponse": {
+      "description": "Response payload for shipping a package",
+      "properties": {
+        "message": {
+          "description": "Success or error message",
+          "type": "string"
+        },
+        "shipped_package_itinerary": {
+          "description": "Itinerary of the shipped packages",
+          "items": {
+            "$ref": "#/definitions/ShippedPackage"
+          },
+          "type": "array"
+        },
+        "status": {
+          "description": "Status of the shipping operation",
+          "type": "string"
+        }
+      },
+      "title": "Ship Package Response",
+      "type": "object"
+    },
+    "GetOrderResponse": {
+      "description": "Response payload for retrieving an order",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/Order",
+          "description": "Order details"
+        },
+        "status": {
+          "description": "Status of the operation",
+          "type": "string"
+        }
+      },
+      "title": "Get Order Response",
+      "type": "object"
+    },
+    "GetShippedPackagesResponse": {
+      "description": "Response payload for retrieving shipped packages",
+      "properties": {
+        "shipped_packages": {
+          "description": "List of shipped packages",
+          "items": {
+            "$ref": "#/definitions/ShippedPackage"
+          },
+          "type": "array"
+        },
+        "status": {
+          "description": "Status of the operation",
+          "type": "string"
+        }
+      },
+      "title": "Get Shipped Packages Response",
+      "type": "object"
+    },
+    "Product": {
+      "description": "A product in the inventory",
+      "properties": {
+        "id": {
+          "description": "ID of the product",
+          "type": "integer"
+        },
+        "mass_kg": {
+          "description": "Mass of the product in kilograms",
+          "type": "float"
+        },
+        "product_id": {
+          "description": "Unique identifier of the product",
+          "type": "string"
+        },
+        "product_name": {
+          "description": "Name of the product",
+          "type": "string"
+        }
+      },
+      "title": "Product",
+      "type": "object"
+    },
+    "Inventory": {
+      "description": "Inventory details of a product",
+      "properties": {
+        "created_at": {
+          "description": "Timestamp of when the inventory was created",
+          "type": "string"
+        },
+        "id": {
+          "description": "ID of the inventory",
+          "type": "integer"
+        },
+        "product": {
+          "$ref": "#/definitions/Product",
+          "description": "Product details"
+        },
+        "quantity": {
+          "description": "Quantity of the product in inventory",
+          "type": "integer"
+        },
+        "updated_at": {
+          "description": "Timestamp of when the inventory was last updated",
+          "type": "string"
+        }
+      },
+      "title": "Inventory",
+      "type": "object"
+    },
+    "RestockRequest": {
+      "description": "Request payload for restocking inventory",
+      "properties": {
+        "_json": {
+          "description": "List of items to restock",
+          "items": {
+            "$ref": "#/definitions/RestockItem"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Restock Request",
+      "type": "object"
+    },
+    "OrderItemResponse": {
+      "description": "Response details of an order item",
+      "properties": {
+        "id": {
+          "description": "ID of the order item",
+          "type": "integer"
+        },
+        "inserted_at": {
+          "description": "Timestamp of when the order item was created",
+          "type": "string"
+        },
+        "product": {
+          "$ref": "#/definitions/Product",
+          "description": "Product details"
+        },
+        "quantity": {
+          "description": "Quantity of the product",
+          "type": "integer"
+        },
+        "status": {
+          "description": "Status of the order item",
+          "type": "string"
+        },
+        "updated_at": {
+          "description": "Timestamp of when the order item was last updated",
+          "type": "string"
+        }
+      },
+      "title": "Order Item Response",
+      "type": "object"
+    },
+    "Order": {
+      "description": "Details of an order",
+      "properties": {
+        "items": {
+          "description": "List of items in the order",
+          "items": {
+            "$ref": "#/definitions/OrderItemResponse"
+          },
+          "type": "array"
+        },
+        "order_id": {
+          "description": "ID of the order",
+          "type": "string"
+        }
+      },
+      "title": "Order",
+      "type": "object"
+    },
+    "ShippedPackage": {
+      "description": "Details of a shipped package",
+      "properties": {
+        "id": {
+          "description": "ID of the shipped package",
+          "type": "integer"
+        },
+        "inserted_at": {
+          "description": "Timestamp of when the package was shipped",
+          "type": "string"
+        },
+        "order_id": {
+          "description": "ID of the associated order",
+          "type": "string"
+        },
+        "product": {
+          "$ref": "#/definitions/Product",
+          "description": "Product details"
+        },
+        "quantity": {
+          "description": "Quantity of the product in the package",
+          "type": "integer"
+        },
+        "status": {
+          "description": "Status of the shipped package",
+          "type": "string"
+        },
+        "updated_at": {
+          "description": "Timestamp of when the package was last updated",
+          "type": "string"
+        }
+      },
+      "title": "Shipped Package",
+      "type": "object"
+    },
+    "Shipping": {
+      "description": "Details of a shipping",
+      "properties": {
+        "id": {
+          "description": "ID of the shipping",
+          "type": "integer"
+        },
+        "inserted_at": {
+          "description": "Timestamp of when the shipping was created",
+          "type": "string"
+        },
+        "order_id": {
+          "description": "ID of the associated order",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the shipping",
+          "type": "string"
+        },
+        "updated_at": {
+          "description": "Timestamp of when the shipping was last updated",
+          "type": "string"
+        }
+      },
+      "title": "Shipping",
+      "type": "object"
+    },
+    "ShippingResponse": {
+      "description": "Response payload for retrieving a shipping",
+      "properties": {
+        "shipping": {
+          "$ref": "#/definitions/Shipping",
+          "description": "Shipping details"
+        }
+      },
+      "title": "Shipping Response",
+      "type": "object"
+    }
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/api/catalog": {
+      "get": {
+        "description": "Retrieve the product catalog",
+        "operationId": "InventoryApiWeb.InventoriesController.get_catalog",
+        "parameters": [],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/GetCatalogResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Get product catalog",
+        "tags": [
+          "Inventories"
+        ]
+      }
+    },
+    "/api/get_inventories": {
+      "get": {
+        "description": "Retrieve the current inventories",
+        "operationId": "InventoryApiWeb.InventoriesController.get_inventories",
+        "parameters": [],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/GetInventoriesResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Get inventories",
+        "tags": [
+          "Inventories"
+        ]
+      }
+    },
+    "/api/init_catalog": {
+      "post": {
+        "description": "Initialize the product catalog with the provided product information",
+        "operationId": "InventoryApiWeb.InventoriesController.init_catalog",
+        "parameters": [
+          {
+            "description": "Product information",
+            "in": "body",
+            "name": "product_info",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InitCatalogRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/InitCatalogResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Initialize product catalog",
+        "tags": [
+          "Inventories"
+        ]
+      }
+    },
+    "/api/orders/{order_id}": {
+      "get": {
+        "description": "Retrieve an order by its ID",
+        "operationId": "InventoryApiWeb.OrdersController.get_order_by_order_id",
+        "parameters": [
+          {
+            "description": "ID of the order",
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/GetOrderResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Get an order by ID",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/api/process_order": {
+      "post": {
+        "description": "Process an order with the requested items",
+        "operationId": "InventoryApiWeb.OrdersController.process_order",
+        "parameters": [
+          {
+            "description": "List of requested items",
+            "in": "body",
+            "name": "requested",
+            "required": true,
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/OrderItem"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "ID of the order",
+            "in": "query",
+            "name": "order_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ProcessOrderResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Process an order",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/api/process_restock": {
+      "post": {
+        "description": "Process a restock of inventory items",
+        "operationId": "InventoryApiWeb.InventoriesController.process_restock",
+        "parameters": [
+          {
+            "description": "Restock items",
+            "in": "body",
+            "name": "restock_items",
+            "required": true,
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/RestockItem"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/RestockResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Process restock",
+        "tags": [
+          "Inventories"
+        ]
+      }
+    },
+    "/api/reset_catalog": {
+      "post": {
+        "description": "Reset the product catalog",
+        "operationId": "InventoryApiWeb.InventoriesController.re_init_catalog",
+        "parameters": [],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ReInitCatalogResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Reset product catalog",
+        "tags": [
+          "Inventories"
+        ]
+      }
+    },
+    "/api/ship_package": {
+      "post": {
+        "description": "Ship a package for an order",
+        "operationId": "InventoryApiWeb.ShippingsController.ship_package",
+        "parameters": [
+          {
+            "description": "ID of the order",
+            "in": "query",
+            "name": "order_id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "List of shipped items",
+            "in": "body",
+            "name": "shipped",
+            "required": true,
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ShippedItem"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ShipPackageResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Ship a package",
+        "tags": [
+          "Shippings"
+        ]
+      }
+    },
+    "/api/shippings/{order_id}": {
+      "get": {
+        "description": "Retrieve shipped packages for a specific order",
+        "operationId": "InventoryApiWeb.ShippingsController.get_shipped_packages_by_order_id",
+        "parameters": [
+          {
+            "description": "ID of the order",
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/GetShippedPackagesResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Get shipped packages by order ID",
+        "tags": [
+          "Shippings"
+        ]
+      }
+    }
+  },
+  "swagger": "2.0",
+  "produces": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "Inventories",
+      "description": "Operations about Inventories"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ]
+}

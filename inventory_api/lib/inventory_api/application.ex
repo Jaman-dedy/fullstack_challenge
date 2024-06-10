@@ -13,7 +13,7 @@ defmodule InventoryApi.Application do
       {InventoryApi.Services.InventoryService, []},
       {InventoryApi.Services.OrderService, []},
       {InventoryApi.Services.ShippingService, []},
-      {InventoryApi.Services.RestockService, []}
+      # {InventoryApi.Services.RestockService, []}
 
     ]
 

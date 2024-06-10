@@ -1,10 +1,21 @@
 defmodule InventoryApiWeb.InventoriesController do
   use InventoryApiWeb, :controller
+  use PhoenixSwagger
 
-  # alias InventoryApi.Inventory.Inventories
   alias InventoryApi.Services.InventoryService
 
   action_fallback(InventoryApiWeb.FallbackController)
+
+  swagger_path :init_catalog do
+    post "/api/init_catalog"
+    summary "Initialize product catalog"
+    description "Initialize the product catalog with the provided product information"
+    produces "application/json"
+    parameter :product_info, :body, Schema.ref(:InitCatalogRequest), "Product information", required: true
+    response 200, "Success", Schema.ref(:InitCatalogResponse)
+    response 400, "Bad Request", Schema.ref(:ErrorResponse)
+    response 422, "Unprocessable Entity", Schema.ref(:ErrorResponse)
+  end
 
   def init_catalog(conn, %{"product_info" => product_info}) do
     handle_init_catalog(conn, product_info)
@@ -99,6 +110,15 @@ defmodule InventoryApiWeb.InventoriesController do
     end
   end
 
+  swagger_path :get_catalog do
+    get "/api/catalog"
+    summary "Get product catalog"
+    description "Retrieve the product catalog"
+    produces "application/json"
+    response 200, "Success", Schema.ref(:GetCatalogResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
+  end
+
   def get_catalog(conn, _params) do
     case InventoryService.get_catalog() do
       {:ok, catalog} ->
@@ -137,6 +157,15 @@ defmodule InventoryApiWeb.InventoriesController do
     end)
   end
 
+  swagger_path :re_init_catalog do
+    post "/api/reset_catalog"
+    summary "Reset product catalog"
+    description "Reset the product catalog"
+    produces "application/json"
+    response 200, "Success", Schema.ref(:ReInitCatalogResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
+  end
+
   def re_init_catalog(conn, _params) do
     case InventoryService.reinitialize_catalog() do
       {:ok, :catalog_reinitialized} ->
@@ -144,6 +173,16 @@ defmodule InventoryApiWeb.InventoriesController do
         |> put_status(:ok)
         |> json(%{message: "Product catalog was successfully reset"})
     end
+  end
+
+  swagger_path :process_restock do
+    post "/api/process_restock"
+    summary "Process restock"
+    description "Process a restock of inventory items"
+    produces "application/json"
+    parameter :restock_items, :body, Schema.array(:RestockItem), "Restock items", required: true
+    response 200, "Success", Schema.ref(:RestockResponse)
+    response 422, "Unprocessable Entity", Schema.ref(:ErrorResponse)
   end
 
   def process_restock(conn, %{"_json" => restock_params}) when is_list(restock_params) do
@@ -205,6 +244,15 @@ defmodule InventoryApiWeb.InventoriesController do
     end
   end
 
+  swagger_path :get_inventories do
+    get "/api/get_inventories"
+    summary "Get inventories"
+    description "Retrieve the current inventories"
+    produces "application/json"
+    response 200, "Success", Schema.ref(:GetInventoriesResponse)
+    response 404, "Not Found", Schema.ref(:ErrorResponse)
+  end
+
   def get_inventories(conn, _params) do
     case InventoryService.get_inventories() do
       {:ok, inventories} ->
@@ -242,75 +290,4 @@ defmodule InventoryApiWeb.InventoriesController do
     end
   end
 
-  # def index(conn, _params) do
-  #   inventories = Inventories.list_inventories()
-  #   render(conn, "index.json", inventories: inventories)
-  # end
-
-  # def create(conn, %{"inventory" => inventory_params}) do
-  #   case Inventories.create_inventory(inventory_params) do
-  #     {:ok, inventory} ->
-  #       conn
-  #       |> put_status(:created)
-  #       |> put_resp_header("location", ~p"/api/inventories/#{inventory.id}")
-  #       |> render("show.json", inventory: inventory)
-
-  #     {:error, changeset} ->
-  #       conn
-  #       |> put_status(:unprocessable_entity)
-  #       |> render("error.json", changeset: changeset)
-  #   end
-  # end
-
-  # def show(conn, %{"id" => id}) do
-  #   case Inventories.get_inventory(id) do
-  #     nil ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Inventory not found"})
-
-  #     inventory ->
-  #       render(conn, "show.json", inventory: inventory)
-  #   end
-  # end
-
-  # def update(conn, %{"id" => id, "inventory" => inventory_params}) do
-  #   case Inventories.get_inventory(id) do
-  #     nil ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Inventory not found"})
-
-  #     inventory ->
-  #       case Inventories.update_inventory(inventory, inventory_params) do
-  #         {:ok, updated_inventory} ->
-  #           render(conn, "show.json", inventory: updated_inventory)
-
-  #         {:error, changeset} ->
-  #           conn
-  #           |> put_status(:unprocessable_entity)
-  #           |> render("error.json", changeset: changeset)
-  #       end
-  #   end
-  # end
-
-  # def delete(conn, %{"id" => id}) do
-  #   case Inventories.get_inventory(id) do
-  #     nil ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Inventory not found"})
-
-  #     inventory ->
-  #       case Inventories.delete_inventory(inventory) do
-  #         {:ok, _deleted_inventory} ->
-  #           send_resp(conn, :no_content, "")
-
-  #         {:error, reason} ->
-  #           conn
-  #           |> put_status(:unprocessable_entity)
-  #           |> json(%{error: reason})
-  #       end
-  #   end
-  # end
 end
