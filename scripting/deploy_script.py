@@ -6,7 +6,6 @@ import logging
 import traceback
 from cryptography.fernet import Fernet
 
-# Configure logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_csv_data(file_path):
@@ -95,7 +94,6 @@ def deploy_database_to_region(db_file, region):
     try:
         efs_dir = f"aws_efs/{region}"
         os.makedirs(efs_dir, exist_ok=True)
-        # Create the "databases" directory if it doesn't exist
         os.makedirs("databases", exist_ok=True)
         src_path = os.path.join("databases", db_file)
         dest_path = os.path.join(efs_dir, db_file)
@@ -104,30 +102,21 @@ def deploy_database_to_region(db_file, region):
         logging.error(f"Error deploying database to region: {str(e)}")
 
 def main():
-    # Input and output file paths
     input_file = "data/data.csv"
     sorted_data_file = "data/sorted_data.csv"
 
-    # Regions for deployment
     regions = ["China", "Germany", "Wakanda"]
 
-    # Read data from CSV file
     data = read_csv_data(input_file)
-
-    # Sort data by mine site
     sorted_data = sorted(data, key=lambda row: row['mine_site'])
 
-    # Generate a random encryption key
     encryption_key = Fernet.generate_key()
 
-    # Write sorted data to CSV file with encrypted sensitive data
     fieldnames = ['mine_site', 'blasting_material', 'quantity', 'unit']
     write_csv_data(sorted_data_file, sorted_data, fieldnames, encryption_key)
 
-    # Create the "databases" directory if it doesn't exist
     os.makedirs("databases", exist_ok=True)
 
-    # Create SQLite databases for each mine site and import data
     mine_sites = set(row['mine_site'] for row in sorted_data)
     for mine_site in mine_sites:
         db_name = f"databases/{mine_site}.db"
@@ -137,7 +126,6 @@ def main():
             import_data_to_database(conn, mine_site_data)
             conn.close()
 
-    # Deploy databases to regions mimicking AWS EFS
     for db_file in os.listdir("databases"):
         for region in regions:
             deploy_database_to_region(db_file, region)
