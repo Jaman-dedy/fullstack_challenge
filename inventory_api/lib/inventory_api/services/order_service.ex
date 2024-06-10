@@ -19,18 +19,6 @@ defmodule InventoryApi.Services.OrderService do
     GenServer.call(__MODULE__, {:get_order_by_order_id, order_id})
   end
 
-  # def create_order(attrs \\ %{}) do
-  #   GenServer.call(__MODULE__, {:create_order, attrs})
-  # end
-
-  # def get_order(id) do
-  #   GenServer.call(__MODULE__, {:get_order, id})
-  # end
-
-  # def update_order(id, attrs) do
-  #   GenServer.call(__MODULE__, {:update_order, id, attrs})
-  # end
-
   def handle_call({:process_order, order_params}, _from, state) do
     case validate_order(order_params) do
       {:ok, order} ->
@@ -61,38 +49,6 @@ defmodule InventoryApi.Services.OrderService do
         {:reply, {:ok, order_items}, state}
     end
   end
-
-  # def handle_call({:create_order, attrs}, _from, state) do
-  #   case Orders.create_order(attrs) do
-  #     {:ok, order} ->
-  #       {:reply, {:ok, order}, state}
-  #     {:error, changeset} ->
-  #       {:reply, {:error, changeset}, state}
-  #   end
-  # end
-
-  # def handle_call({:get_order, id}, _from, state) do
-  #   case Orders.get_order(id) do
-  #     nil ->
-  #       {:reply, {:error, :not_found}, state}
-  #     order ->
-  #       {:reply, {:ok, order}, state}
-  #   end
-  # end
-
-  # def handle_call({:update_order, id, attrs}, _from, state) do
-  #   case Orders.get_order(id) do
-  #     nil ->
-  #       {:reply, {:error, :not_found}, state}
-  #     order ->
-  #       case Orders.update_order(order, attrs) do
-  #         {:ok, updated_order} ->
-  #           {:reply, {:ok, updated_order}, state}
-  #         {:error, changeset} ->
-  #           {:reply, {:error, changeset}, state}
-  #       end
-  #   end
-  # end
 
   defp validate_order(order_params) do
     case Map.has_key?(order_params, "order_id") do
@@ -133,7 +89,6 @@ defmodule InventoryApi.Services.OrderService do
   end
 
   defp create_order_items(order_id, requested_items) do
-    # Check if all requested items are available in the inventory
     available? = Enum.all?(requested_items, fn item ->
       product_id = item["product_id"]
       quantity = item["quantity"]
@@ -144,30 +99,24 @@ defmodule InventoryApi.Services.OrderService do
     end)
 
     if available? do
-      # Create or update order items and update inventory quantities
       Enum.each(requested_items, fn item ->
         product_id = item["product_id"]
         quantity = item["quantity"]
 
-        # Check if an order item with the same order_id and product_id already exists
         case Orders.get_order_item_by_order_and_product(order_id, product_id) do
           nil ->
-            # Create a new order item
             attrs = %{order_id: order_id, product_id: product_id, quantity: quantity, status: "init"}
             {:ok, _order_item} = Orders.create_order_item(attrs)
           order_item ->
-            # Update the quantity of the existing order item
             updated_quantity = order_item.quantity + quantity
             Orders.update_order_item(order_item, %{quantity: updated_quantity})
         end
 
-        # Update the inventory quantity
         inventory = Inventories.get_inventory_by_product_id(product_id)
         updated_quantity = inventory.quantity - quantity
         Inventories.update_inventory(inventory, %{quantity: updated_quantity})
       end)
 
-      # Fetch the created order items
       order_items = Orders.get_order_items_by_order_id(order_id)
       {:ok, order_items}
     else

@@ -27,18 +27,6 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.call(__MODULE__, :is_catalog_initialized)
   end
 
-  # def create_inventory(attrs \\ %{}) do
-  #   GenServer.call(__MODULE__, {:create_inventory, attrs})
-  # end
-
-  # def get_inventory(id) do
-  #   GenServer.call(__MODULE__, {:get_inventory, id})
-  # end
-
-  # def update_inventory(id, attrs) do
-  #   GenServer.call(__MODULE__, {:update_inventory, id, attrs})
-  # end
-
   def get_catalog() do
     GenServer.call(__MODULE__, :get_catalog)
   end
@@ -47,8 +35,6 @@ defmodule InventoryApi.Services.InventoryService do
     GenServer.call(__MODULE__, :get_inventories)
   end
 
-
-  # Callback functions
 
   def handle_call({:init_catalog, _product_info}, _from, %{catalog_initialized: true} = state) do
     {:reply, {:error, :catalog_already_initialized}, state}
@@ -176,38 +162,6 @@ defmodule InventoryApi.Services.InventoryService do
       {:reply, {:error, :catalog_not_initialized}, state}
     end
   end
-
-  # def handle_call({:create_inventory, attrs}, _from, state) do
-  #   case Inventories.create_inventory(attrs) do
-  #     {:ok, inventory} ->
-  #       {:reply, {:ok, inventory}, state}
-  #     {:error, changeset} ->
-  #       {:reply, {:error, changeset}, state}
-  #   end
-  # end
-
-  # def handle_call({:get_inventory, id}, _from, state) do
-  #   case Inventories.get_inventory(id) do
-  #     nil ->
-  #       {:reply, {:error, :not_found}, state}
-  #     inventory ->
-  #       {:reply, {:ok, inventory}, state}
-  #   end
-  # end
-
-  # def handle_call({:update_inventory, id, attrs}, _from, state) do
-  #   case Inventories.get_inventory(id) do
-  #     nil ->
-  #       {:reply, {:error, :not_found}, state}
-  #     inventory ->
-  #       case Inventories.update_inventory(inventory, attrs) do
-  #         {:ok, updated_inventory} ->
-  #           {:reply, {:ok, updated_inventory}, state}
-  #         {:error, changeset} ->
-  #           {:reply, {:error, changeset}, state}
-  #       end
-  #   end
-  # end
 
   defp has_duplicate_product_ids?(product_info) do
     product_ids = Enum.map(product_info, & &1["product_id"])
