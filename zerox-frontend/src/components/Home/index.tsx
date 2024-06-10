@@ -1,28 +1,43 @@
+'use client'
+import React, { useState } from 'react';
 import Layout from '@/components/Layout'
 import Stats from '@/components/Stats'
-import {trucksData} from '@/data/trucks'
-import {docksData} from '@/data/docks'
 
-import React, {
-  Dispatch,
-  SetStateAction,
-  useState,
-  DragEvent,
-  FormEvent,
-} from "react";
-import { FiPlus, FiTrash } from "react-icons/fi";
-import { motion } from "framer-motion";
-import { FaFire } from "react-icons/fa";
 
 import Board from '@/components/Board'
 
 export default function CustomKanban () {
+
+  const [truckCount, setTruckCount] = useState(48);
+  const [chargedTruckCount, setChargedTruckCount] = useState(0);
+  const [chargingStationCount, setChargingStationCount] = useState(10);
+
+  const handleTruckCountChange = (count) => {
+    setTruckCount(count);
+  };
+
+  const handleChargedTruckCountChange = (count) => {
+    setChargedTruckCount(count);
+  };
+
+  const handleChargingStationCountChange = (count) => {
+    setChargingStationCount(count);
+  };
+  
   return (
     <Layout>
        <div className="lg:mx-4 mx-2">
-          <Stats/>
+          <Stats 
+          truckCount={truckCount} 
+          chargedTruckCount={chargedTruckCount}
+          chargingStationCount={chargingStationCount}
+          />
         </div>
-      <Board />
+      <Board
+      updateTruckCount={handleTruckCountChange}
+      updateChargedTruckCount={handleChargedTruckCountChange}
+      updateChargingStationCount={handleChargingStationCountChange}
+      />
     </Layout>
   );
 };

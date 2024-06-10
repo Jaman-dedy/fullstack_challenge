@@ -25,11 +25,12 @@ A backend system built with Elixir and the Phoenix framework for efficient inven
 
 ![alt text](image.png)
 
-You're right! Including the expected responses for each test case can provide more clarity and make the document more comprehensive. Here's the updated version with the responses included:
+Frontend
+![alt text](image-1.png)
 
 ### Inventory API Test Cases
 
-This document outlines the test cases for the Inventory API, covering validations, edge cases, and data flow scenarios for the `init_catalog`, `process_restock`, `process_order`, and `ship_package` endpoints.
+The test cases for the Inventory API, covering validations, edge cases, and data flow scenarios for the `init_catalog`, `process_restock`, `process_order`, and `ship_package` endpoints.
 
 #### Init_catalog
 
